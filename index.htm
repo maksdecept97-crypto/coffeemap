@@ -1,115 +1,111 @@
 <!DOCTYPE html>
-<html>
+<html lang="ru">
 <head>
-  <title>Карта кофеен</title>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Карта кофеен</title>
   <script src="https://api-maps.yandex.ru/2.1/?lang=ru_RU" type="text/javascript"></script>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
-    html, body, #map {
+    html, body {
       margin: 0;
       padding: 0;
       height: 100%;
       width: 100%;
     }
-    /* убираем второй скролл у баббла */
+    #map {
+      width: 100%;
+      height: 100%;
+    }
+    /* Чтобы убрать двойные полосы прокрутки в бабле */
     .ymaps-2-1-79-balloon__content {
-      overflow-y: hidden !important;
+      overflow: hidden !important;
+    }
+    .balloon-body {
+      max-height: 200px;
+      overflow-y: auto;
+    }
+    .balloon-body img, 
+    .balloon-body iframe {
+      max-width: 100%;
+      height: auto;
+      display: block;
     }
   </style>
 </head>
 <body>
 <div id="map"></div>
-<button id="geoBtn" style="
-  position: absolute;
-  bottom: 20px;
-  left: 50%;
-  transform: translateX(-50%);
-  z-index: 1000;
-  padding: 10px 15px;
-  border: none;
-  border-radius: 8px;
-  background: #3399ff;
-  color: #fff;
-  font-size: 14px;
-  cursor: pointer;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.3);
-">
-📍 Моё местоположение
-</button>
 
 <script>
 ymaps.ready(init);
 
+let map;
+
 function init() {
-  var map = new ymaps.Map("map", {
+  // Создаём карту
+  map = new ymaps.Map("map", {
     center: [59.93, 30.34],
-    zoom: 12
+    zoom: 12,
+    controls: ['zoomControl', 'geolocationControl']
   });
 
-  // кофейни
-  var coffee1 = new ymaps.Placemark([59.911946, 30.316499], {
+  // Кофейня 1
+  const coffee1 = new ymaps.Placemark([59.911946, 30.316499], {
     balloonContentHeader: "Tour Coffee",
-    balloonContentBody: '<p>Tour coffee — разные сорта и обжарщики. Вкусный кофе и шикарные гриль-чизы.</p>',
+    balloonContentBody: `
+      <div class="balloon-body">
+        <p>Tour coffee — это предвкушение каждый раз чего-то нового: разные сорта, разные обжарщики. Интересно пробовать и знать, что приготовят его хорошо.</p>
+        <p>Здесь подают шикарные гриль-чизы и свежие десерты. И конечно же вкусный кофе.</p>
+         <iframe src="https://t.me/teplo_coffeeroutes/4?embed=1"
+          width="100%" height="300"
+          frameborder="0" scrolling="no"></iframe>
+      </div>
+    `,
     balloonContentFooter: '7-я Красноармейская ул., 5Д'
   }, { preset: 'islands#icon', iconColor: '#b84114' });
 
-  var coffee2 = new ymaps.Placemark([59.960012, 30.311556], {
+  // Кофейня 2
+  const coffee2 = new ymaps.Placemark([59.960012, 30.311556], {
     balloonContentHeader: "UNIC",
-    balloonContentBody: '<p>UNIC — место для вкусной еды, кофе и разговоров.</p>' +
-                        '<iframe src="https://t.me/teplo_coffeeroutes/8?embed=1" ' +
-                        'width="300" height="300" frameborder="0" scrolling="no"></iframe>',
+    balloonContentBody: `
+      <div class="balloon-body">
+        <p>UNIC — место, куда хочется приходить — за вкусной едой, кофе и разговором с теми, кто по-настоящему увлечён своим делом.</p>
+        <iframe src="https://t.me/teplo_coffeeroutes/8?embed=1"
+          width="100%" height="300"
+          frameborder="0" scrolling="no"></iframe>
+      </div>
+    `,
     balloonContentFooter: 'ул. Кронверская, 12'
   }, { preset: 'islands#icon', iconColor: '#ff4500' });
 
   map.geoObjects.add(coffee1);
   map.geoObjects.add(coffee2);
 
-  // функция для получения геопозиции
-  function locateUser() {
-    ymaps.geolocation.get({
-      provider: 'browser',
-      mapStateAutoApply: false
-    }).then(function (result) {
-      try {
-        var coords = result.geoObjects.get(0).geometry.getCoordinates();
-        addUserMarker(coords);
-      } catch (e) {
-        console.log("Не удалось получить из browser, пробуем yandex");
-        ymaps.geolocation.get({ provider: 'yandex', mapStateAutoApply: false })
-          .then(function (res) {
-            var coords = res.geoObjects.get(0).geometry.getCoordinates();
-            addUserMarker(coords);
-          });
-      }
-    });
-  }
+  // Определение геопозиции
+  locateUser();
+}
 
-  function locateUser() {
+function locateUser() {
   ymaps.geolocation.get({
     provider: 'browser',
     mapStateAutoApply: false
   }).then(function (res) {
-    var coords = res.geoObjects.get(0).geometry.getCoordinates();
+    const coords = res.geoObjects.get(0).geometry.getCoordinates();
     addUserMarker(coords);
-  }, function (e) {
-    console.error("Ошибка геолокации", e);
+  }, function (err) {
+    console.error("Ошибка геолокации:", err);
   });
 }
 
 function addUserMarker(coords) {
-  var userMarker = new ymaps.Placemark(coords, {
+  const userMarker = new ymaps.Placemark(coords, {
     balloonContent: 'Вы здесь'
-  }, { preset: 'islands#circleIcon', iconColor: '#3399ff' });
+  }, {
+    preset: 'islands#circleIcon',
+    iconColor: '#3399ff'
+  });
   map.geoObjects.add(userMarker);
   map.setCenter(coords, 14, { duration: 500 });
-}
-
-
-  // кнопка
-  document.getElementById("geoBtn").addEventListener("click", locateUser);
 }
 </script>
 </body>
 </html>
-
