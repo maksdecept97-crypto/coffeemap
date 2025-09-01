@@ -50,7 +50,7 @@ function init() {
                 <p>Tour coffee — это предвкушение каждый раз чего-то нового: разные сорта, разные обжарщики. Интересно пробовать и знать, что приготовят его хорошо.<br>
                 Здесь подают шикарные гриль-чизы и свежие десерты. И конечно же вкусный кофе.</p>
                 <iframe src="https://t.me/teplo_coffeeroutes/7?embed=1" 
-                        style="height:400px; border:0;" scrolling="yes"></iframe>
+                        style="height:400px; border:0;" scrolling="no"></iframe>
             </div>
         `,
         balloonContentFooter: '7-я Красноармейская ул., 5Д'
@@ -63,7 +63,7 @@ function init() {
             <div class="balloon-content">
                 <p>UNIC — место, куда хочется приходить — за вкусной едой, кофе и разговором с теми, кто по-настоящему увлечён своим делом.</p>
                 <iframe src="https://t.me/teplo_coffeeroutes/8?embed=1" 
-                        style="height:400px; border:0;" scrolling="yes"></iframe>
+                        style="height:400px; border:0;" scrolling="no"></iframe>
             </div>
         `,
         balloonContentFooter: 'ул. Кронверская, 12'
@@ -73,7 +73,7 @@ function init() {
     map.geoObjects.add(coffee2);
 
     // Текущая геопозиция пользователя
-    ymaps.geolocation.get({ provider: 'browser', mapStateAutoApply: true })
+  /*  ymaps.geolocation.get({ provider: 'browser', mapStateAutoApply: true })
     .then(function (result) {
         if (result.geoObjects && result.geoObjects.position) {
             var userMarker = new ymaps.Placemark(result.geoObjects.position, {
@@ -87,7 +87,13 @@ function init() {
     .catch(function(e){
         console.log('Геопозиция недоступна', e);
     });
-}
+}*/map.locate({setView: true, maxZoom: 16});
+  function onLocationFound(e) {
+    L.marker(e.latlng).addTo(map).bindPopup("Вы здесь").openPopup();
+  }
+  map.on('locationfound', onLocationFound);
+
 </script>
 </body>
 </html>
+
