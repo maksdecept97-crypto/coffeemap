@@ -6,19 +6,15 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <script src="https://api-maps.yandex.ru/2.1/?lang=ru_RU" type="text/javascript"></script>
   <style>
-    body, html {
+    html, body, #map {
       margin: 0;
       padding: 0;
       height: 100%;
       width: 100%;
     }
-    #map {
-      width: 100%;
-      height: 100vh;
-    }
-    /* фикс для бабблов */
+    /* убираем второй скролл у баббла */
     .ymaps-2-1-79-balloon__content {
-      max-height: 250px !important;
+      overflow-y: hidden !important;
     }
   </style>
 </head>
@@ -60,7 +56,9 @@ function init() {
 
   var coffee2 = new ymaps.Placemark([59.960012, 30.311556], {
     balloonContentHeader: "UNIC",
-    balloonContentBody: '<p>UNIC — место для вкусной еды, кофе и разговоров.</p><iframe src="https://t.me/teplo_coffeeroutes/8?embed=1" width="300" height="400" frameborder="0"></iframe>',
+    balloonContentBody: '<p>UNIC — место для вкусной еды, кофе и разговоров.</p>' +
+                        '<iframe src="https://t.me/teplo_coffeeroutes/8?embed=1" ' +
+                        'width="300" height="300" frameborder="0" scrolling="no"></iframe>',
     balloonContentFooter: 'ул. Кронверская, 12'
   }, { preset: 'islands#icon', iconColor: '#ff4500' });
 
@@ -73,20 +71,17 @@ function init() {
       provider: 'browser',
       mapStateAutoApply: false
     }).then(function (result) {
-      if (result.geoObjects && result.geoObjects.position) {
-        var coords = result.geoObjects.position;
+      try {
+        var coords = result.geoObjects.get(0).geometry.getCoordinates();
         addUserMarker(coords);
-      } else {
-        // fallback через yandex
+      } catch (e) {
+        console.log("Не удалось получить из browser, пробуем yandex");
         ymaps.geolocation.get({ provider: 'yandex', mapStateAutoApply: false })
           .then(function (res) {
-            if (res.geoObjects && res.geoObjects.position) {
-              addUserMarker(res.geoObjects.position);
-            }
+            var coords = res.geoObjects.get(0).geometry.getCoordinates();
+            addUserMarker(coords);
           });
       }
-    }).catch(function (e) {
-      console.log("Геопозиция не получена:", e);
     });
   }
 
@@ -98,10 +93,7 @@ function init() {
     map.setCenter(coords, 14, { duration: 500 });
   }
 
-  // сразу пробуем найти
-  locateUser();
-
-  // по кнопке
+  // кнопка
   document.getElementById("geoBtn").addEventListener("click", locateUser);
 }
 </script>
