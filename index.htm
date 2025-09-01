@@ -7,57 +7,37 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 <style>
-  * { box-sizing:border-box; margin:0; padding:0; }
-  body { font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; height:100vh; display:flex; flex-direction:column; }
-
-  /* ---------- Шапка ---------- */
-  .header { background:#3c1b0b; color:#fff; padding:15px 20px; display:flex; justify-content:space-between; align-items:center; box-shadow:0 2px 5px rgba(0,0,0,0.2); }
-  .header h1 { font-size:1.5rem; }
-  .search-container { position:relative; width:100%; max-width:400px; }
-  .search-box { width:100%; padding:10px 15px; border:none; border-radius:20px; font-size:1rem; }
-
-  /* ---------- Фильтры ---------- */
-  .filter-container { background:#f5f5f5; padding:10px 20px; display:flex; flex-wrap:wrap; gap:10px; border-bottom:1px solid #ddd; align-items:center; }
-  .filter-btn { background:#fff; border:1px solid #ddd; border-radius:20px; padding:5px 15px; cursor:pointer; transition:0.3s; }
-  .filter-btn:hover, .filter-btn.active { background:#3c1b0b; color:#fff; }
-  #metro-filter { margin-left:auto; padding:5px 10px; border-radius:300px; border:1px solid #ddd; }
-
-  /* ---------- Основной контент ---------- */
-  .main-content { display:flex; flex:1; height:calc(100vh - 130px); }
-  .sidebar { width:300px; background:#fff; border-right:1px solid #ddd; overflow-y:auto; display:flex; flex-direction:column; }
-  .coffee-list { list-style:none; padding:0; margin:0; }
-  .coffee-item { padding:15px; border-bottom:1px solid #eee; cursor:pointer; transition:0.2s; }
-  .coffee-item:hover { background:#f9f9f9; }
-  .coffee-item.active { background:#f0e6d8; }
-  .coffee-name { font-weight:bold; color:#3c1b0b; margin-bottom:5px; }
-  .coffee-address { font-size:0.9rem; color:#666; }
-  .coffee-rating { color:#ff9800; margin-top:5px; }
-  #map { flex:1; height:100%; }
-
-  /* ---------- Балун ---------- */
-  .balloon-scroll { max-height:80vh; overflow-y:auto; }
-  .balloon-content { padding:15px; }
-  .balloon-header { font-size:1.2rem; font-weight:bold; margin-bottom:10px; color:#3c1b0b; }
-  .balloon-address { color:#666; margin-bottom:10px; font-size:0.9rem; }
-  .balloon-description { margin-bottom:15px; line-height:1.4; }
-  .balloon-rating { margin-bottom:10px; color:#ff9800; }
-  .balloon-footer { display:flex; justify-content:flex-end; gap:10px; margin-top:15px; }
-  .balloon-btn { background:#3c1b0b; color:#fff; border:none; padding:8px 15px; border-radius:4px; cursor:pointer; }
-
-  /* ---------- Telegram iframe ---------- */
-  .telegram-embed { width:100%; height:300px; border:none; }
-
-  /* ---------- Кнопка геолокации ---------- */
-  .user-location-btn { position:absolute; right:20px; bottom:30px; background:#fff; border:none; border-radius:50%; width:40px; height:40px; box-shadow:0 1px 5px rgba(0,0,0,0.3); cursor:pointer; z-index:1000; display:flex; justify-content:center; align-items:center; }
-
-  /* ---------- Адаптив ---------- */
-  @media(max-width:768px){
-    .main-content { flex-direction:column; }
-    .sidebar { width:100%; height:200px; border-right:none; border-bottom:1px solid #ddd; }
-    .header { flex-direction:column; gap:10px; }
-    .search-container { max-width:100%; }
-    .filter-container { overflow-x:auto; flex-wrap:nowrap; }
-  }
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Segoe UI', Tahoma, Geneva, Verdana,sans-serif;height:100vh;display:flex;flex-direction:column;}
+.header{background-color:#3c1b0b;color:white;padding:15px 20px;display:flex;justify-content:space-between;align-items:center;box-shadow:0 2px 5px rgba(0,0,0,0.2);}
+.header h1{font-size:1.5rem;}
+.search-container{position:relative;width:100%;max-width:400px;}
+.search-box{width:100%;padding:10px 15px;border:none;border-radius:20px;font-size:1rem;}
+.filter-container{background-color:#f5f5f5;padding:10px 20px;display:flex;flex-wrap:wrap;gap:10px;border-bottom:1px solid #ddd;align-items:center;}
+.filter-btn{background-color:white;border:1px solid #ddd;border-radius:20px;padding:5px 15px;cursor:pointer;transition:all 0.3s;}
+.filter-btn:hover,.filter-btn.active{background-color:#3c1b0b;color:white;}
+#metro-filter{padding:5px 10px;border-radius:5px;border:1px solid #ccc;}
+.main-content{display:flex;flex:1;height:calc(100vh - 130px);}
+.sidebar{width:300px;background-color:white;border-right:1px solid #ddd;overflow-y:auto;display:flex;flex-direction:column;}
+.coffee-list{list-style:none;padding:0;margin:0;}
+.coffee-item{padding:15px;border-bottom:1px solid #eee;cursor:pointer;transition:0.2s;}
+.coffee-item:hover{background-color:#f9f9f9;}
+.coffee-item.active{background-color:#f0e6d8;}
+.coffee-name{font-weight:bold;color:#3c1b0b;margin-bottom:5px;}
+.coffee-address{font-size:0.9rem;color:#666;}
+.coffee-rating{color:#ff9800;margin-top:5px;}
+#map{flex:1;height:100%;}
+.balloon-scroll{max-height:80vh;overflow-y:auto;}
+.balloon-content{padding:15px;}
+.balloon-header{font-size:1.2rem;font-weight:bold;margin-bottom:10px;color:#3c1b0b;}
+.balloon-address{color:#666;margin-bottom:10px;font-size:0.9rem;}
+.balloon-description{margin-bottom:15px;line-height:1.4;}
+.balloon-rating{margin-bottom:10px;color:#ff9800;}
+.balloon-footer{display:flex;justify-content:flex-end;gap:10px;margin-top:15px;}
+.balloon-btn{background-color:#3c1b0b;color:white;border:none;padding:8px 15px;border-radius:4px;cursor:pointer;}
+.telegram-embed{width:100%;height:300px;border:none;}
+.user-location-btn{position:absolute;right:20px;bottom:30px;background-color:white;border:none;border-radius:50%;width:40px;height:40px;box-shadow:0 1px 5px rgba(0,0,0,0.3);cursor:pointer;z-index:1000;display:flex;justify-content:center;align-items:center;}
+@media(max-width:768px){.main-content{flex-direction:column;}.sidebar{width:100%;height:200px;border-right:none;border-bottom:1px solid #ddd;}.header{flex-direction:column;gap:10px;}.search-container{max-width:100%;}.filter-container{overflow-x:auto;flex-wrap:nowrap;}}
 </style>
 </head>
 <body>
@@ -74,39 +54,33 @@
   <button class="filter-btn" data-filter="rating">Высокий рейтинг</button>
   <button class="filter-btn" data-filter="center">В центре</button>
   <button class="filter-btn" data-filter="with-food">С едой</button>
-
   <select id="metro-filter">
-    <option value="">Ближайшее метро</option>
-    <option value="59.931,-30.360">Невский проспект</option>
-    <option value="59.940,-30.313">Гостиный двор</option>
-    <option value="59.945,-30.325">Площадь Восстания</option>
+    <option value="">Метро (выберите)</option>
+    <option value="59.9311,30.3609">Невский проспект</option>
+    <option value="59.9398,30.3146">Владимирская</option>
+    <option value="59.9500,30.3160">Площадь Восстания</option>
+    <!-- Добавляйте свои станции -->
   </select>
 </div>
 
 <div class="main-content">
-  <div class="sidebar">
-    <ul class="coffee-list"></ul>
-  </div>
+  <div class="sidebar"><ul class="coffee-list"></ul></div>
   <div id="map"></div>
 </div>
 
-<button class="user-location-btn" title="Мое местоположение">
-  <i class="fas fa-location-arrow"></i>
-</button>
+<button class="user-location-btn" title="Мое местоположение"><i class="fas fa-location-arrow"></i></button>
 
 <script>
 ymaps.ready(init);
 let map, coffeePlaces=[], userMarker=null, metroCircle=null;
 
-// ---------- Данные кофеен ----------
 const coffeeData = [
-  { id:1, name:"Tour Coffee", coordinates:[59.911946,30.316499], address:"7-я Красноармейская ул., 5Д", description:"Tour coffee — это предвкушение каждый раз чего-то нового: разные сорта, разные обжарщики. Здесь подают гриль-чизы и свежие десерты. И конечно кофе.", telegramEmbed:"https://t.me/teplo_coffeeroutes/4?embed=1", rating:4.8, tags:["center","with-food","rating"]},
-  { id:2, name:"UNIC", coordinates:[59.960012,30.311556], address:"ул. Кронверская, 12", description:"UNIC — место, куда хочется приходить за едой и кофе.", telegramEmbed:"https://t.me/teplo_coffeeroutes/8?embed=1", rating:4.7, tags:["center","with-food"]},
-  { id:3, name:"Coffee Room", coordinates:[59.935142,30.320084], address:"наб. реки Фонтанки, 93", description:"Уютное место с отличным кофе и атмосферой.", telegramEmbed:"https://t.me/teplo_coffeeroutes/12?embed=1", rating:4.5, tags:["center"]},
-  { id:4, name:"Bonch Coffee", coordinates:[59.885614,30.319235], address:"Боровая ул., 7", description:"Современная кофейня с собственным обжарочным производством.", telegramEmbed:"https://t.me/teplo_coffeeroutes/15?embed=1", rating:4.9, tags:["rating","with-food"]}
+  {id:1,name:"Tour Coffee",coordinates:[59.911946,30.316499],address:"7-я Красноармейская ул., 5Д",description:"Tour coffee — это предвкушение каждый раз чего-то нового: разные сорта, разные обжарщики. Здесь подают гриль-чизы и свежие десерты. И конечно кофе.",telegramEmbed:"https://t.me/teplo_coffeeroutes/4?embed=1",rating:4.8,tags:["center","with-food","rating"]},
+  {id:2,name:"UNIC",coordinates:[59.960012,30.311556],address:"ул. Кронверская, 12",description:"UNIC — место, куда хочется приходить за едой и кофе.",telegramEmbed:"https://t.me/teplo_coffeeroutes/8?embed=1",rating:4.7,tags:["center","with-food"]},
+  {id:3,name:"Coffee Room",coordinates:[59.935142,30.320084],address:"наб. реки Фонтанки, 93",description:"Уютное место с отличным кофе и атмосферой.",telegramEmbed:"https://t.me/teplo_coffeeroutes/12?embed=1",rating:4.5,tags:["center"]},
+  {id:4,name:"Bonch Coffee",coordinates:[59.885614,30.319235],address:"Боровая ул., 7",description:"Современная кофейня с собственным обжарочным производством.",telegramEmbed:"https://t.me/teplo_coffeeroutes/15?embed=1",rating:4.9,tags:["rating","with-food"]}
 ];
 
-// ---------- Инициализация ----------
 function init(){
   map = new ymaps.Map("map",{center:[59.93,30.34], zoom:12, controls:['zoomControl','geolocationControl']});
   addCoffeePlaces();
@@ -115,7 +89,6 @@ function init(){
   locateUser();
 }
 
-// ---------- Метки кофеен ----------
 function addCoffeePlaces(){
   coffeeData.forEach(coffee=>{
     const placemark = new ymaps.Placemark(coffee.coordinates,{
@@ -129,112 +102,98 @@ function addCoffeePlaces(){
             <div class="balloon-rating">Рейтинг: ${coffee.rating} ★</div>
             <iframe class="telegram-embed" src="${coffee.telegramEmbed}"></iframe>
             <div class="balloon-footer">
-              <button class="balloon-btn" onclick="routeTo(${coffee.coordinates[0]}, ${coffee.coordinates[1]})">Маршрут</button>
+              <button class="balloon-btn" onclick="routeTo(${coffee.coordinates[0]},${coffee.coordinates[1]})">Маршрут</button>
             </div>
           </div>
-        </div>
-      `
-    },{preset:'islands#icon', iconColor:'#b84114'});
-    coffeePlaces.push({id:coffee.id, placemark, data:coffee});
+        </div>`
+    },{preset:'islands#icon',iconColor:'#b84114'});
+    coffeePlaces.push({id:coffee.id,placemark,data:coffee});
     map.geoObjects.add(placemark);
-    placemark.events.add('click',()=>{ highlightCoffeeItem(coffee.id); });
+    placemark.events.add('click',()=>{highlightCoffeeItem(coffee.id);});
   });
 }
 
-// ---------- Список кофеен ----------
 function renderCoffeeList(){
-  const listContainer=document.querySelector('.coffee-list');
-  listContainer.innerHTML='';
+  const list=document.querySelector('.coffee-list');
+  list.innerHTML='';
   coffeeData.forEach(coffee=>{
     const li=document.createElement('li');
     li.className='coffee-item'; li.dataset.id=coffee.id;
     li.innerHTML=`<div class="coffee-name">${coffee.name}</div><div class="coffee-address">${coffee.address}</div><div class="coffee-rating">${'★'.repeat(Math.floor(coffee.rating))} ${coffee.rating}</div>`;
     li.addEventListener('click',()=>{
       const cp=coffeePlaces.find(c=>c.id===coffee.id);
-      if(cp){ map.setCenter(cp.placemark.geometry.getCoordinates(),16); cp.placemark.balloon.open(); highlightCoffeeItem(coffee.id); }
+      if(cp){map.setCenter(cp.placemark.geometry.getCoordinates(),16); cp.placemark.balloon.open(); highlightCoffeeItem(coffee.id);}
     });
-    listContainer.appendChild(li);
+    list.appendChild(li);
   });
 }
 
-// ---------- Подсветка ----------
 function highlightCoffeeItem(id){
   document.querySelectorAll('.coffee-item').forEach(i=>i.classList.remove('active'));
-  const sel=document.querySelector(`.coffee-item[data-id="${id}"]`);
-  if(sel){ sel.classList.add('active'); sel.scrollIntoView({behavior:'smooth', block:'nearest'}); }
+  const selected=document.querySelector(`.coffee-item[data-id="${id}"]`);
+  if(selected){selected.classList.add('active'); selected.scrollIntoView({behavior:'smooth',block:'nearest'});}
 }
 
-// ---------- Фильтры ----------
 function initEventHandlers(){
-  const searchBox=document.querySelector('.search-box');
-  searchBox.addEventListener('input', function(){
-    applyFilters();
-  });
-
-  document.querySelectorAll('.filter-btn').forEach(btn=>btn.addEventListener('click', function(){
-    document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));
-    this.classList.add('active');
+  document.querySelector('.search-box').addEventListener('input',applyFilters);
+  document.querySelectorAll('.filter-btn').forEach(btn=>btn.addEventListener('click',function(){
+    document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active')); this.classList.add('active');
     applyFilters();
   }));
-
-  document.getElementById('metro-filter').addEventListener('change', function(){
-    applyFilters();
-  });
-
-  document.querySelector('.user-location-btn').addEventListener('click', locateUser);
+  document.getElementById('metro-filter').addEventListener('change',applyFilters);
+  document.querySelector('.user-location-btn').addEventListener('click',locateUser);
 }
 
 function applyFilters(){
   const searchText=document.querySelector('.search-box').value.toLowerCase();
   const activeFilter=document.querySelector('.filter-btn.active').dataset.filter;
   const metroVal=document.getElementById('metro-filter').value;
-  let metroCoords = null;
   const radiusMeters=500;
+  let metroCoords=null;
 
-  if(metroCircle){ map.geoObjects.remove(metroCircle); metroCircle=null; }
-  if(metroVal){ metroCoords = metroVal.split(',').map(Number); metroCircle = new ymaps.Circle([metroCoords,radiusMeters], {}, {fillColor:'#DB709380', strokeColor:'#990066', strokeWidth:2}); map.geoObjects.add(metroCircle); }
+  if(metroCircle){map.geoObjects.remove(metroCircle); metroCircle=null;}
+  if(metroVal){
+    metroCoords=metroVal.split(',').map(Number);
+    metroCircle=new ymaps.Circle([metroCoords,radiusMeters],{}, {fillColor:'#DB709380',strokeColor:'#990066',strokeWidth:2});
+    map.geoObjects.add(metroCircle);
+  }
 
   coffeePlaces.forEach(cp=>{
     const name=cp.data.name.toLowerCase(), addr=cp.data.address.toLowerCase();
     let visible=true;
 
     // Поиск
-    if(searchText && !name.includes(searchText) && !addr.includes(searchText)){ visible=false; }
+    if(searchText && !name.includes(searchText) && !addr.includes(searchText)) visible=false;
 
-    // Фильтр по тегам
-    if(activeFilter!=='all' && !cp.data.tags.includes(activeFilter)){ visible=false; }
+    // Тег
+    if(activeFilter!=='all' && !cp.data.tags.includes(activeFilter)) visible=false;
 
-    // Фильтр по метро
+    // Метро
     if(metroCoords){
-      const dist = ymaps.coordSystem.geo.getDistance(cp.data.coordinates, metroCoords);
+      const dist=ymaps.coordSystem.geo.getDistance(cp.data.coordinates,metroCoords);
       if(dist>radiusMeters) visible=false;
     }
 
-    cp.placemark.options.set('visible', visible);
-    document.querySelector(`.coffee-item[data-id="${cp.id}"]`).style.display = visible ? 'block' : 'none';
+    cp.placemark.options.set('visible',visible);
+    const li=document.querySelector(`.coffee-item[data-id="${cp.id}"]`);
+    if(li) li.style.display=visible?'block':'none';
   });
 }
 
-// ---------- Геолокация ----------
 function locateUser(){
-  if(!navigator.geolocation){ alert("Геолокация не поддерживается вашим браузером."); return; }
-  navigator.geolocation.getCurrentPosition(position=>{
-    const coords=[position.coords.latitude, position.coords.longitude]; addUserMarker(coords);
-  }, error=>{
-    console.error("Ошибка геолокации:", error); alert("Не удалось определить ваше местоположение. Проверьте настройки геолокации или используйте HTTPS.");
-  }, { enableHighAccuracy:true, timeout:5000 });
+  if(!navigator.geolocation){alert("Геолокация не поддерживается вашим браузером."); return;}
+  navigator.geolocation.getCurrentPosition(pos=>{
+    const coords=[pos.coords.latitude,pos.coords.longitude]; addUserMarker(coords);
+  },err=>{console.error("Ошибка геолокации:",err); alert("Не удалось определить местоположение. Используйте HTTPS и разрешите геолокацию.");},{enableHighAccuracy:true,timeout:5000});
 }
 
 function addUserMarker(coords){
-  if(userMarker){ map.geoObjects.remove(userMarker); }
-  userMarker=new ymaps.Placemark(coords,{ balloonContent:'Вы здесь' },{ preset:'islands#circleIcon', iconColor:'#3399ff' });
+  if(userMarker){map.geoObjects.remove(userMarker);}
+  userMarker=new ymaps.Placemark(coords,{balloonContent:'Вы здесь'},{preset:'islands#circleIcon',iconColor:'#3399ff'});
   map.geoObjects.add(userMarker); map.setCenter(coords,14,{duration:500});
 }
 
-// ---------- Маршрут ----------
-function routeTo(lat, lon){ alert(`Маршрут будет построен к координатам: ${lat}, ${lon}`); }
-
+function routeTo(lat,lon){alert(`Маршрут будет построен к координатам: ${lat}, ${lon}`);}
 </script>
 </body>
 </html>
-
