@@ -73,7 +73,7 @@ function init() {
     map.geoObjects.add(coffee2);
 
     // Текущая геопозиция пользователя
-  /*  ymaps.geolocation.get({ provider: 'browser', mapStateAutoApply: true })
+    ymaps.geolocation.get({ provider: 'browser', mapStateAutoApply: true })
     .then(function (result) {
         if (result.geoObjects && result.geoObjects.position) {
             var userMarker = new ymaps.Placemark(result.geoObjects.position, {
@@ -87,13 +87,10 @@ function init() {
     .catch(function(e){
         console.log('Геопозиция недоступна', e);
     });
-}*/map.locate({setView: true, maxZoom: 16});
-  function onLocationFound(e) {
-    L.marker(e.latlng).addTo(map).bindPopup("Вы здесь").openPopup();
-  }
-  map.on('locationfound', onLocationFound);
+}
 
 </script>
 </body>
 </html>
+
 
