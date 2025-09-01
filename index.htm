@@ -21,26 +21,24 @@ function init(){
         zoom: 12
     });
 
-    // Пример маркера кофейни
+    // Маркер 1 — Tour Coffee
     var coffee1 = new ymaps.Placemark([59.911946, 30.316499], {
-    balloonContentHeader: "Tour Coffee",
-    balloonContentBody: '<p>Tour coffee — это предвкушение каждый раз чего-то нового: разные сорта, разные обжарщики. Интересно пробовать и знать, что приготовят его хорошо.
-Здесь подают шикарные гриль‑чизы и свежие десерты. И конечно же вкусный кофе.</p><img src="" width="100">',
-    balloonContentFooter: '7-я Красноармейская ул., 5Д'
-}, { preset: 'islands#icon', iconColor: '#b84114' });
+        balloonContentHeader: "Tour Coffee",
+        balloonContentBody: '<p>Tour coffee — это предвкушение каждый раз чего-то нового: разные сорта, разные обжарщики. Интересно пробовать и знать, что приготовят его хорошо.<br>Здесь подают шикарные гриль-чизы и свежие десерты. И конечно же вкусный кофе.</p><img src="" width="100">',
+        balloonContentFooter: '7-я Красноармейская ул., 5Д'
+    }, { preset: 'islands#icon', iconColor: '#b84114' });
 
-var coffee2 = new ymaps.Placemark([59.960012, 30.311556], {
-    balloonContentHeader: "UNIC",
-    balloonContentBody: '<p>UNIC — место, куда хочется приходить — за вкусной едой, кофе и разговором с теми, кто по-настоящему увлечён своим делом.</p><iframe src="https://t.me/teplo_coffeeroutes/8?embed=1"
-        width="320" height="420"
-        frameborder="0" scrolling="no"></iframe>
-    `,
-    balloonContentFooter: 'ул. Кронверская, 12'
-}, { preset: 'islands#icon', iconColor: '#ff4500' });
+    // Маркер 2 — UNIC с Telegram-постом
+    var coffee2 = new ymaps.Placemark([59.960012, 30.311556], {
+        balloonContentHeader: "UNIC",
+        balloonContentBody: '<p>UNIC — место, куда хочется приходить — за вкусной едой, кофе и разговором с теми, кто по-настоящему увлечён своим делом.</p>' +
+            '<iframe src="https://t.me/teplo_coffeeroutes/8?embed=1" ' +
+            'width="320" height="420" frameborder="0" scrolling="no"></iframe>',
+        balloonContentFooter: 'ул. Кронверская, 12'
+    }, { preset: 'islands#icon', iconColor: '#ff4500' });
 
-map.geoObjects.add(coffee1);
-map.geoObjects.add(coffee2);
-
+    map.geoObjects.add(coffee1);
+    map.geoObjects.add(coffee2);
 
     // Определение текущей позиции пользователя
     ymaps.geolocation.get({
@@ -59,6 +57,3 @@ map.geoObjects.add(coffee2);
 </script>
 </body>
 </html>
-
-
-
