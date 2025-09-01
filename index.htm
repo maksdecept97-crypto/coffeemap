@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <title>Карта кофеен</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0"> <!-- Масштаб под мобильные -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script src="https://api-maps.yandex.ru/2.1/?lang=ru_RU" type="text/javascript"></script>
     <style>
         html, body {
@@ -16,14 +16,16 @@
             width: 100%;
             height: 100%;
         }
-        /* Баллоны: чтобы картинки и iframes не вылазили за экран */
-        img, iframe {
-            max-width: 100%;
+        /* Баллоны */
+        .balloon-content {
+            max-width: 320px;
+            max-height: 450px;
+            overflow: auto; /* включаем прокрутку если контента больше */
+        }
+        .balloon-content img, .balloon-content iframe {
+            width: 100%;
             height: auto;
             border-radius: 8px;
-        }
-        .balloon-content {
-            max-width: 320px; /* ограничиваем ширину для удобства чтения */
         }
     </style>
 </head>
@@ -32,15 +34,15 @@
 
 <script>
 ymaps.ready(init);
-function init(){
-    // Создаем карту
+
+function init() {
     var map = new ymaps.Map("map", {
-        center: [59.93, 30.34], // центр СПб
+        center: [59.93, 30.34],
         zoom: 12,
-        controls: ['zoomControl', 'geolocationControl'] // только нужные кнопки
+        controls: ['zoomControl', 'geolocationControl']
     });
 
-    // Tour Coffee
+    // Маркер 1 — Tour Coffee
     var coffee1 = new ymaps.Placemark([59.911946, 30.316499], {
         balloonContentHeader: "Tour Coffee",
         balloonContentBody: `
@@ -48,39 +50,42 @@ function init(){
                 <p>Tour coffee — это предвкушение каждый раз чего-то нового: разные сорта, разные обжарщики. Интересно пробовать и знать, что приготовят его хорошо.<br>
                 Здесь подают шикарные гриль-чизы и свежие десерты. И конечно же вкусный кофе.</p>
                 <iframe src="https://t.me/teplo_coffeeroutes/7?embed=1" 
-                        width="320" height="500" frameborder="0" scrolling="no"></iframe>
-            </div>`,
+                        style="height:400px; border:0;" scrolling="yes"></iframe>
+            </div>
+        `,
         balloonContentFooter: '7-я Красноармейская ул., 5Д'
     }, { preset: 'islands#icon', iconColor: '#b84114' });
 
-    // UNIC
+    // Маркер 2 — UNIC
     var coffee2 = new ymaps.Placemark([59.960012, 30.311556], {
         balloonContentHeader: "UNIC",
         balloonContentBody: `
             <div class="balloon-content">
                 <p>UNIC — место, куда хочется приходить — за вкусной едой, кофе и разговором с теми, кто по-настоящему увлечён своим делом.</p>
                 <iframe src="https://t.me/teplo_coffeeroutes/8?embed=1" 
-                        width="320" height="500" frameborder="0" scrolling="no"></iframe>
-            </div>`,
+                        style="height:400px; border:0;" scrolling="yes"></iframe>
+            </div>
+        `,
         balloonContentFooter: 'ул. Кронверская, 12'
     }, { preset: 'islands#icon', iconColor: '#ff4500' });
 
-    // Добавляем кофейни на карту
     map.geoObjects.add(coffee1);
     map.geoObjects.add(coffee2);
 
-    // Определяем текущую позицию пользователя
-    ymaps.geolocation.get({
-        provider: 'browser',
-        mapStateAutoApply: true
-    }).then(function (result) {
-        var userMarker = new ymaps.Placemark(result.geoObjects.position, {
-            balloonContent: 'Вы здесь'
-        }, {
-            preset: 'islands#circleIcon',
-            iconColor: '#3399ff'
-        });
-        map.geoObjects.add(userMarker);
+    // Текущая геопозиция пользователя
+    ymaps.geolocation.get({ provider: 'browser', mapStateAutoApply: true })
+    .then(function (result) {
+        if (result.geoObjects && result.geoObjects.position) {
+            var userMarker = new ymaps.Placemark(result.geoObjects.position, {
+                balloonContent: 'Вы здесь'
+            }, { preset: 'islands#circleIcon', iconColor: '#3399ff' });
+            map.geoObjects.add(userMarker);
+            // Опционально: центрируем карту по пользователю
+            map.setCenter(result.geoObjects.position, 14, { duration: 500 });
+        }
+    })
+    .catch(function(e){
+        console.log('Геопозиция недоступна', e);
     });
 }
 </script>
