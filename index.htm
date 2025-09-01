@@ -5,7 +5,6 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <script src="https://api-maps.yandex.ru/2.1/?lang=ru_RU" type="text/javascript"></script>
-  <script src="https://telegram.org/js/telegram-web-app.js"></script>
   <style>
     body, html {
       margin: 0;
@@ -17,15 +16,31 @@
       width: 100%;
       height: 100vh;
     }
-    /* фикс для больших бабблов на мобиле */
+    /* фикс для бабблов */
     .ymaps-2-1-79-balloon__content {
       max-height: 250px !important;
-      overflow-y: auto !important;
     }
   </style>
 </head>
 <body>
 <div id="map"></div>
+<button id="geoBtn" style="
+  position: absolute;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 1000;
+  padding: 10px 15px;
+  border: none;
+  border-radius: 8px;
+  background: #3399ff;
+  color: #fff;
+  font-size: 14px;
+  cursor: pointer;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+">
+📍 Моё местоположение
+</button>
 
 <script>
 ymaps.ready(init);
@@ -36,46 +51,58 @@ function init() {
     zoom: 12
   });
 
-  // Пример кофейни
+  // кофейни
   var coffee1 = new ymaps.Placemark([59.911946, 30.316499], {
     balloonContentHeader: "Tour Coffee",
-    balloonContentBody: '<p>Tour coffee — предвкушение чего-то нового: разные сорта и обжарщики. Вкусный кофе и шикарные гриль-чизы.</p>',
+    balloonContentBody: '<p>Tour coffee — разные сорта и обжарщики. Вкусный кофе и шикарные гриль-чизы.</p>',
     balloonContentFooter: '7-я Красноармейская ул., 5Д'
   }, { preset: 'islands#icon', iconColor: '#b84114' });
 
   var coffee2 = new ymaps.Placemark([59.960012, 30.311556], {
     balloonContentHeader: "UNIC",
-    balloonContentBody: '<p>UNIC — место для вкусной еды, кофе и разговоров.</p><iframe src="https://t.me/teplo_coffeeroutes/8?embed=1" width="320" height="420" frameborder="0" scrolling="no"></iframe>',
+    balloonContentBody: '<p>UNIC — место для вкусной еды, кофе и разговоров.</p><iframe src="https://t.me/teplo_coffeeroutes/8?embed=1" width="300" height="400" frameborder="0"></iframe>',
     balloonContentFooter: 'ул. Кронверская, 12'
   }, { preset: 'islands#icon', iconColor: '#ff4500' });
 
   map.geoObjects.add(coffee1);
   map.geoObjects.add(coffee2);
 
-  // Попробуем сначала через Telegram WebApp API
-  if (window.Telegram && Telegram.WebApp && Telegram.WebApp.initDataUnsafe?.user) {
-    console.log("Открыто в Telegram WebApp");
-    // В некоторых случаях Telegram передаёт координаты в initDataUnsafe
-    // Но надёжнее попросить у пользователя через отдельную кнопку (добавим позже)
+  // функция для получения геопозиции
+  function locateUser() {
+    ymaps.geolocation.get({
+      provider: 'browser',
+      mapStateAutoApply: false
+    }).then(function (result) {
+      if (result.geoObjects && result.geoObjects.position) {
+        var coords = result.geoObjects.position;
+        addUserMarker(coords);
+      } else {
+        // fallback через yandex
+        ymaps.geolocation.get({ provider: 'yandex', mapStateAutoApply: false })
+          .then(function (res) {
+            if (res.geoObjects && res.geoObjects.position) {
+              addUserMarker(res.geoObjects.position);
+            }
+          });
+      }
+    }).catch(function (e) {
+      console.log("Геопозиция не получена:", e);
+    });
   }
 
-  // Стандартная геолокация браузера
-  ymaps.geolocation.get({
-    provider: 'browser',
-    mapStateAutoApply: false
-  }).then(function (result) {
-    console.log("Геолокация:", result);
-    if (result.geoObjects && result.geoObjects.position) {
-      var coords = result.geoObjects.position;
-      var userMarker = new ymaps.Placemark(coords, {
-        balloonContent: 'Вы здесь'
-      }, { preset: 'islands#circleIcon', iconColor: '#3399ff' });
-      map.geoObjects.add(userMarker);
-      map.setCenter(coords, 14, { duration: 500 });
-    }
-  }).catch(function (e) {
-    console.log("Геопозиция недоступна:", e);
-  });
+  function addUserMarker(coords) {
+    var userMarker = new ymaps.Placemark(coords, {
+      balloonContent: 'Вы здесь'
+    }, { preset: 'islands#circleIcon', iconColor: '#3399ff' });
+    map.geoObjects.add(userMarker);
+    map.setCenter(coords, 14, { duration: 500 });
+  }
+
+  // сразу пробуем найти
+  locateUser();
+
+  // по кнопке
+  document.getElementById("geoBtn").addEventListener("click", locateUser);
 }
 </script>
 </body>
