@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Карта кофеен</title>
+    <meta charset="utf-8">
+    <script src="https://api-maps.yandex.ru/2.1/?lang=ru_RU" type="text/javascript"></script>
+    <style>
+        #map { width: 100%; height: 500px; }
+        body { margin: 0; padding: 0; }
+    </style>
+</head>
+<body>
+<div id="map"></div>
+
+<script>
+ymaps.ready(init);
+function init(){
+    // Создаем карту
+    var map = new ymaps.Map("map", {
+        center: [59.93, 30.34], // Начальные координаты карты
+        zoom: 12
+    });
+
+    // Пример маркера кофейни
+    var coffee1 = new ymaps.Placemark([59.911946, 30.316499], {
+    balloonContentHeader: "Tour Coffee",
+    balloonContentBody: '<p>Фильтр и атмосфера</p><img src="https://example.com/photo.jpg" width="100">',
+    balloonContentFooter: '7-я Красноармейская ул., 5Д'
+}, { preset: 'islands#icon', iconColor: '#b84114' });
+
+var coffee2 = new ymaps.Placemark([59.936, 30.340], {
+    balloonContentHeader: "UNIC",
+    balloonContentBody: '<p>Разнообразное меню</p><img src="https://example.com/unic.jpg" width="100">',
+    balloonContentFooter: 'ул. Другая, 15'
+}, { preset: 'islands#icon', iconColor: '#ff4500' });
+
+map.geoObjects.add(coffee1);
+map.geoObjects.add(coffee2);
+
+
+    // Определение текущей позиции пользователя
+    ymaps.geolocation.get({
+        provider: 'browser',
+        mapStateAutoApply: true
+    }).then(function (result) {
+        var userMarker = new ymaps.Placemark(result.geoObjects.position, {
+            balloonContent: 'Вы здесь'
+        }, {
+            preset: 'islands#circleIcon',
+            iconColor: '#3399ff'
+        });
+        map.geoObjects.add(userMarker);
+    });
+}
+</script>
+</body>
+</html>
