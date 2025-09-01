@@ -1,33 +1,28 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <title>Карта кофеен</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <script src="https://api-maps.yandex.ru/2.1/?lang=ru_RU" type="text/javascript"></script>
-    <style>
-        html, body {
-            width: 100%;
-            height: 100%;
-            margin: 0;
-            padding: 0;
-        }
-        #map {
-            width: 100%;
-            height: 100%;
-        }
-        /* Баллоны */
-        .balloon-content {
-            max-width: 320px;
-            max-height: 450px;
-            overflow: auto; /* включаем прокрутку если контента больше */
-        }
-        .balloon-content img, .balloon-content iframe {
-            width: 100%;
-            height: auto;
-            border-radius: 8px;
-        }
-    </style>
+  <title>Карта кофеен</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="https://api-maps.yandex.ru/2.1/?lang=ru_RU" type="text/javascript"></script>
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <style>
+    body, html {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      width: 100%;
+    }
+    #map {
+      width: 100%;
+      height: 100vh;
+    }
+    /* фикс для больших бабблов на мобиле */
+    .ymaps-2-1-79-balloon__content {
+      max-height: 250px !important;
+      overflow-y: auto !important;
+    }
+  </style>
 </head>
 <body>
 <div id="map"></div>
@@ -36,61 +31,52 @@
 ymaps.ready(init);
 
 function init() {
-    var map = new ymaps.Map("map", {
-        center: [59.93, 30.34],
-        zoom: 12,
-        controls: ['zoomControl', 'geolocationControl']
-    });
+  var map = new ymaps.Map("map", {
+    center: [59.93, 30.34],
+    zoom: 12
+  });
 
-    // Маркер 1 — Tour Coffee
-    var coffee1 = new ymaps.Placemark([59.911946, 30.316499], {
-        balloonContentHeader: "Tour Coffee",
-        balloonContentBody: `
-            <div class="balloon-content">
-                <p>Tour coffee — это предвкушение каждый раз чего-то нового: разные сорта, разные обжарщики. Интересно пробовать и знать, что приготовят его хорошо.<br>
-                Здесь подают шикарные гриль-чизы и свежие десерты. И конечно же вкусный кофе.</p>
-                <iframe src="https://t.me/teplo_coffeeroutes/7?embed=1" 
-                        style="height:400px; border:0;" scrolling="no"></iframe>
-            </div>
-        `,
-        balloonContentFooter: '7-я Красноармейская ул., 5Д'
-    }, { preset: 'islands#icon', iconColor: '#b84114' });
+  // Пример кофейни
+  var coffee1 = new ymaps.Placemark([59.911946, 30.316499], {
+    balloonContentHeader: "Tour Coffee",
+    balloonContentBody: '<p>Tour coffee — предвкушение чего-то нового: разные сорта и обжарщики. Вкусный кофе и шикарные гриль-чизы.</p>',
+    balloonContentFooter: '7-я Красноармейская ул., 5Д'
+  }, { preset: 'islands#icon', iconColor: '#b84114' });
 
-    // Маркер 2 — UNIC
-    var coffee2 = new ymaps.Placemark([59.960012, 30.311556], {
-        balloonContentHeader: "UNIC",
-        balloonContentBody: `
-            <div class="balloon-content">
-                <p>UNIC — место, куда хочется приходить — за вкусной едой, кофе и разговором с теми, кто по-настоящему увлечён своим делом.</p>
-                <iframe src="https://t.me/teplo_coffeeroutes/8?embed=1" 
-                        style="height:400px; border:0;" scrolling="no"></iframe>
-            </div>
-        `,
-        balloonContentFooter: 'ул. Кронверская, 12'
-    }, { preset: 'islands#icon', iconColor: '#ff4500' });
+  var coffee2 = new ymaps.Placemark([59.960012, 30.311556], {
+    balloonContentHeader: "UNIC",
+    balloonContentBody: '<p>UNIC — место для вкусной еды, кофе и разговоров.</p><iframe src="https://t.me/teplo_coffeeroutes/8?embed=1" width="320" height="420" frameborder="0" scrolling="no"></iframe>',
+    balloonContentFooter: 'ул. Кронверская, 12'
+  }, { preset: 'islands#icon', iconColor: '#ff4500' });
 
-    map.geoObjects.add(coffee1);
-    map.geoObjects.add(coffee2);
+  map.geoObjects.add(coffee1);
+  map.geoObjects.add(coffee2);
 
-    // Текущая геопозиция пользователя
-    ymaps.geolocation.get({ provider: 'browser', mapStateAutoApply: true })
-    .then(function (result) {
-        if (result.geoObjects && result.geoObjects.position) {
-            var userMarker = new ymaps.Placemark(result.geoObjects.position, {
-                balloonContent: 'Вы здесь'
-            }, { preset: 'islands#circleIcon', iconColor: '#3399ff' });
-            map.geoObjects.add(userMarker);
-            // Опционально: центрируем карту по пользователю
-            map.setCenter(result.geoObjects.position, 14, { duration: 500 });
-        }
-    })
-    .catch(function(e){
-        console.log('Геопозиция недоступна', e);
-    });
+  // Попробуем сначала через Telegram WebApp API
+  if (window.Telegram && Telegram.WebApp && Telegram.WebApp.initDataUnsafe?.user) {
+    console.log("Открыто в Telegram WebApp");
+    // В некоторых случаях Telegram передаёт координаты в initDataUnsafe
+    // Но надёжнее попросить у пользователя через отдельную кнопку (добавим позже)
+  }
+
+  // Стандартная геолокация браузера
+  ymaps.geolocation.get({
+    provider: 'browser',
+    mapStateAutoApply: false
+  }).then(function (result) {
+    console.log("Геолокация:", result);
+    if (result.geoObjects && result.geoObjects.position) {
+      var coords = result.geoObjects.position;
+      var userMarker = new ymaps.Placemark(coords, {
+        balloonContent: 'Вы здесь'
+      }, { preset: 'islands#circleIcon', iconColor: '#3399ff' });
+      map.geoObjects.add(userMarker);
+      map.setCenter(coords, 14, { duration: 500 });
+    }
+  }).catch(function (e) {
+    console.log("Геопозиция недоступна:", e);
+  });
 }
-
 </script>
 </body>
 </html>
-
-
