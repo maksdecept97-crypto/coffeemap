@@ -56,9 +56,9 @@ body{font-family:'Segoe UI', Tahoma, Geneva, Verdana,sans-serif;height:100vh;dis
   <button class="filter-btn" data-filter="with-food">С едой</button>
   <select id="metro-filter">
     <option value="">Метро (выберите)</option>
-    <option value="59.9311,30.3609">Невский проспект</option>
-    <option value="59.9398,30.3146">Владимирская</option>
-    <option value="59.9500,30.3160">Площадь Восстания</option>
+    <option value="59.935497, 30.327139">Невский проспект</option>
+    <option value="59.927636, 30.347917">Владимирская</option>
+    <option value="59.956157, 30.318796">Горьковская</option>
     <!-- Добавляйте свои станции -->
   </select>
 </div>
@@ -148,7 +148,7 @@ function applyFilters(){
   const searchText=document.querySelector('.search-box').value.toLowerCase();
   const activeFilter=document.querySelector('.filter-btn.active').dataset.filter;
   const metroVal=document.getElementById('metro-filter').value;
-  const radiusMeters=500;
+  const radiusMeters=1000;
   let metroCoords=null;
 
   if(metroCircle){map.geoObjects.remove(metroCircle); metroCircle=null;}
@@ -197,4 +197,5 @@ function routeTo(lat,lon){alert(`Маршрут будет построен к �
 </script>
 </body>
 </html>
+
 
