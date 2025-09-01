@@ -156,4 +156,17 @@ function locateUser(){
   navigator.geolocation.getCurrentPosition(position=>{
     const coords=[position.coords.latitude, position.coords.longitude]; addUserMarker(coords);
   }, error=>{
-    console.error("Ошибка геолокации:", error); alert("Не удалось определить ваше местоположение
+    console.error("Ошибка геолокации:", error); alert("Не удалось определить ваше местоположение. Проверьте настройки геолокации или используйте HTTPS.");
+  }, { enableHighAccuracy:true, timeout:5000 });
+}
+
+function addUserMarker(coords){
+  if(userMarker){ map.geoObjects.remove(userMarker); }
+  userMarker=new ymaps.Placemark(coords,{ balloonContent:'Вы здесь' },{ preset:'islands#circleIcon', iconColor:'#3399ff' });
+  map.geoObjects.add(userMarker); map.setCenter(coords,14,{duration:500});
+}
+
+function routeTo(lat, lon){ alert(`Маршрут будет построен к координатам: ${lat}, ${lon}`); }
+</script>
+</body>
+</html>
