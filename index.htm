@@ -85,13 +85,26 @@ function init() {
     });
   }
 
-  function addUserMarker(coords) {
-    var userMarker = new ymaps.Placemark(coords, {
-      balloonContent: 'Вы здесь'
-    }, { preset: 'islands#circleIcon', iconColor: '#3399ff' });
-    map.geoObjects.add(userMarker);
-    map.setCenter(coords, 14, { duration: 500 });
-  }
+  function locateUser() {
+  ymaps.geolocation.get({
+    provider: 'browser',
+    mapStateAutoApply: false
+  }).then(function (res) {
+    var coords = res.geoObjects.get(0).geometry.getCoordinates();
+    addUserMarker(coords);
+  }, function (e) {
+    console.error("Ошибка геолокации", e);
+  });
+}
+
+function addUserMarker(coords) {
+  var userMarker = new ymaps.Placemark(coords, {
+    balloonContent: 'Вы здесь'
+  }, { preset: 'islands#circleIcon', iconColor: '#3399ff' });
+  map.geoObjects.add(userMarker);
+  map.setCenter(coords, 14, { duration: 500 });
+}
+
 
   // кнопка
   document.getElementById("geoBtn").addEventListener("click", locateUser);
@@ -99,3 +112,4 @@ function init() {
 </script>
 </body>
 </html>
+
