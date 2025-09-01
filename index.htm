@@ -24,13 +24,19 @@ function init(){
     // Пример маркера кофейни
     var coffee1 = new ymaps.Placemark([59.911946, 30.316499], {
     balloonContentHeader: "Tour Coffee",
-    balloonContentBody: '<p>Фильтр и атмосфера</p><img src="https://t.me/teplo_coffeeroutes/8" width="100">',
+    balloonContentBody: '<p>Tour coffee — это предвкушение каждый раз чего-то нового: разные сорта, разные обжарщики. Интересно пробовать и знать, что приготовят его хорошо.
+Здесь подают шикарные гриль‑чизы и свежие десерты. И конечно же вкусный кофе.</p><img src="" width="100">',
     balloonContentFooter: '7-я Красноармейская ул., 5Д'
 }, { preset: 'islands#icon', iconColor: '#b84114' });
 
 var coffee2 = new ymaps.Placemark([59.960012, 30.311556], {
     balloonContentHeader: "UNIC",
-    balloonContentBody: '<p>UNIC — место, куда хочется приходить — за вкусной едой, кофе и разговором с теми, кто по-настоящему увлечён своим делом.</p><img src="https://example.com/unic.jpg" width="100">',
+    balloonContentBody: '<p>UNIC — место, куда хочется приходить — за вкусной едой, кофе и разговором с теми, кто по-настоящему увлечён своим делом.</p><div style="width:320px;max-width:100%;">
+        <iframe src="https://t.me/yourchannel/123?embed=1"
+                width="320" height="420"
+                frameborder="0" scrolling="no"></iframe>
+      </div>
+    `,
     balloonContentFooter: 'ул. Кронверская, 12'
 }, { preset: 'islands#icon', iconColor: '#ff4500' });
 
@@ -55,4 +61,5 @@ map.geoObjects.add(coffee2);
 </script>
 </body>
 </html>
+
 
