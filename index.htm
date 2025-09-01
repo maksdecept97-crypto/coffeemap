@@ -1,12 +1,30 @@
 <!DOCTYPE html>
-<html>
+<html lang="ru">
 <head>
+    <meta charset="UTF-8">
     <title>Карта кофеен</title>
-    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"> <!-- Масштаб под мобильные -->
     <script src="https://api-maps.yandex.ru/2.1/?lang=ru_RU" type="text/javascript"></script>
     <style>
-        #map { width: 100%; height: 500px; }
-        body { margin: 0; padding: 0; }
+        html, body {
+            width: 100%;
+            height: 100%;
+            margin: 0;
+            padding: 0;
+        }
+        #map {
+            width: 100%;
+            height: 100%;
+        }
+        /* Баллоны: чтобы картинки и iframes не вылазили за экран */
+        img, iframe {
+            max-width: 100%;
+            height: auto;
+            border-radius: 8px;
+        }
+        .balloon-content {
+            max-width: 320px; /* ограничиваем ширину для удобства чтения */
+        }
     </style>
 </head>
 <body>
@@ -17,30 +35,41 @@ ymaps.ready(init);
 function init(){
     // Создаем карту
     var map = new ymaps.Map("map", {
-        center: [59.93, 30.34], // Начальные координаты карты
-        zoom: 12
+        center: [59.93, 30.34], // центр СПб
+        zoom: 12,
+        controls: ['zoomControl', 'geolocationControl'] // только нужные кнопки
     });
 
-    // Маркер 1 — Tour Coffee
+    // Tour Coffee
     var coffee1 = new ymaps.Placemark([59.911946, 30.316499], {
         balloonContentHeader: "Tour Coffee",
-        balloonContentBody: '<p>Tour coffee — это предвкушение каждый раз чего-то нового: разные сорта, разные обжарщики. Интересно пробовать и знать, что приготовят его хорошо.<br>Здесь подают шикарные гриль-чизы и свежие десерты. И конечно же вкусный кофе.</p><img src="" width="100">',
+        balloonContentBody: `
+            <div class="balloon-content">
+                <p>Tour coffee — это предвкушение каждый раз чего-то нового: разные сорта, разные обжарщики. Интересно пробовать и знать, что приготовят его хорошо.<br>
+                Здесь подают шикарные гриль-чизы и свежие десерты. И конечно же вкусный кофе.</p>
+                <iframe src="https://t.me/teplo_coffeeroutes/7?embed=1" 
+                        width="320" height="500" frameborder="0" scrolling="no"></iframe>
+            </div>`,
         balloonContentFooter: '7-я Красноармейская ул., 5Д'
     }, { preset: 'islands#icon', iconColor: '#b84114' });
 
-    // Маркер 2 — UNIC с Telegram-постом
+    // UNIC
     var coffee2 = new ymaps.Placemark([59.960012, 30.311556], {
         balloonContentHeader: "UNIC",
-        balloonContentBody: '<p>UNIC — место, куда хочется приходить — за вкусной едой, кофе и разговором с теми, кто по-настоящему увлечён своим делом.</p>' +
-            '<iframe src="https://t.me/teplo_coffeeroutes/8?embed=1" ' +
-            'width="320" height="420" frameborder="0" scrolling="no"></iframe>',
+        balloonContentBody: `
+            <div class="balloon-content">
+                <p>UNIC — место, куда хочется приходить — за вкусной едой, кофе и разговором с теми, кто по-настоящему увлечён своим делом.</p>
+                <iframe src="https://t.me/teplo_coffeeroutes/8?embed=1" 
+                        width="320" height="500" frameborder="0" scrolling="no"></iframe>
+            </div>`,
         balloonContentFooter: 'ул. Кронверская, 12'
     }, { preset: 'islands#icon', iconColor: '#ff4500' });
 
+    // Добавляем кофейни на карту
     map.geoObjects.add(coffee1);
     map.geoObjects.add(coffee2);
 
-    // Определение текущей позиции пользователя
+    // Определяем текущую позицию пользователя
     ymaps.geolocation.get({
         provider: 'browser',
         mapStateAutoApply: true
