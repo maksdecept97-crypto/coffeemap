@@ -59,6 +59,7 @@ body{font-family:'Segoe UI', Tahoma, Geneva, Verdana,sans-serif;height:100vh;dis
     <option value="59.935497, 30.327139">Невский проспект</option>
     <option value="59.927636, 30.347917">Владимирская</option>
     <option value="59.956157, 30.318796">Горьковская</option>
+    <option value="59.944542, 30.359965">Чернышевская</option>
     <!-- Добавляйте свои станции -->
   </select>
 </div>
@@ -77,8 +78,8 @@ let map, coffeePlaces=[], userMarker=null, metroCircle=null;
 const coffeeData = [
   {id:1,name:"Tour Coffee",coordinates:[59.911946,30.316499],address:"7-я Красноармейская ул., 5Д",description:"Tour coffee — это предвкушение каждый раз чего-то нового: разные сорта, разные обжарщики. Здесь подают гриль-чизы и свежие десерты. И конечно кофе.",telegramEmbed:"https://t.me/teplo_coffeeroutes/4?embed=1",rating:4.8,tags:["center","with-food","rating"]},
   {id:2,name:"UNIC",coordinates:[59.960012,30.311556],address:"ул. Кронверская, 12",description:"UNIC — место, куда хочется приходить за едой и кофе.",telegramEmbed:"https://t.me/teplo_coffeeroutes/8?embed=1",rating:4.7,tags:["center","with-food"]},
-  {id:3,name:"Coffee Room",coordinates:[59.935142,30.320084],address:"наб. реки Фонтанки, 93",description:"Уютное место с отличным кофе и атмосферой.",telegramEmbed:"https://t.me/teplo_coffeeroutes/12?embed=1",rating:4.5,tags:["center"]},
-  {id:4,name:"Bonch Coffee",coordinates:[59.885614,30.319235],address:"Боровая ул., 7",description:"Современная кофейня с собственным обжарочным производством.",telegramEmbed:"https://t.me/teplo_coffeeroutes/15?embed=1",rating:4.9,tags:["rating","with-food"]}
+  {id:3,name:"Verlé",coordinates:[59.963493, 30.314817],address:"Каменноостровский пр-т, 25/2",description:"Уютное место с отличным кофе и атмосферой.",telegramEmbed:"https://t.me/teplo_coffeeroutes/15?embed=1",rating:4.5,tags:["center"]},
+  {id:4,name:"Щегол",coordinates:[59.941899, 30.363427],address:"ул. Радищева, 38/20",description:"Уютная кофейня с тёплым, домашним дизайном, куда хочется заходить в любое время года. Приятные тона, мягкий свет и маленькие цветы на каждом столике создают ощущение, что о тебе здесь заботятся.",telegramEmbed:"https://t.me/teplo_coffeeroutes/22?embed=1",rating:4.9,tags:["rating","with-food"]}
 ];
 
 function init(){
@@ -197,6 +198,7 @@ function routeTo(lat,lon){alert(`Маршрут будет построен к �
 </script>
 </body>
 </html>
+
 
 
 
