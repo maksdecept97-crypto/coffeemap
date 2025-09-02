@@ -16,7 +16,7 @@ body{font-family:'Segoe UI', Tahoma, Geneva, Verdana,sans-serif;height:100vh;dis
 .filter-container{background-color:#f5f5f5;padding:10px 20px;display:flex;flex-wrap:wrap;gap:10px;border-bottom:1px solid #ddd;align-items:center;}
 .filter-btn{background-color:white;border:1px solid #ddd;border-radius:20px;padding:5px 15px;cursor:pointer;transition:all 0.3s;}
 .filter-btn:hover,.filter-btn.active{background-color:#3c1b0b;color:white;}
-#metro-filter,#route-mode{padding:5px 10px;border-radius:300px;border:1px solid #ccc;}
+#metro-filter{padding:5px 10px;border-radius:300px;border:1px solid #ccc;}
 .main-content{display:flex;flex:1;height:calc(100vh - 130px);}
 .sidebar{width:300px;background-color:white;border-right:1px solid #ddd;overflow-y:auto;display:flex;flex-direction:column;}
 .coffee-list{list-style:none;padding:0;margin:0;}
@@ -61,12 +61,6 @@ body{font-family:'Segoe UI', Tahoma, Geneva, Verdana,sans-serif;height:100vh;dis
     <option value="59.956157,30.318796">Горьковская</option>
     <option value="59.944542,30.359965">Чернышевская</option>
   </select>
-  <select id="route-mode">
-    <option value="auto">Авто</option>
-    <option value="masstransit">Общественный транспорт</option>
-    <option value="pedestrian">Пешком</option>
-    <option value="bicycle">Велосипед</option>
-  </select>
 </div>
 
 <div class="main-content">
@@ -78,7 +72,8 @@ body{font-family:'Segoe UI', Tahoma, Geneva, Verdana,sans-serif;height:100vh;dis
 
 <script>
 ymaps.ready(init);
-let map, coffeePlaces=[], userMarker=null, metroCircle=null, route=null, userCoords=null, routeMode='auto';
+
+let map, coffeePlaces=[], userMarker=null, userCoords=null, metroCircle=null;
 
 const coffeeData = [
   {id:1,name:"Tour Coffee",coordinates:[59.911946,30.316499],address:"7-я Красноармейская ул., 5Д",description:"Tour coffee — это предвкушение каждый раз чего-то нового: разные сорта, разные обжарщики. Здесь подают гриль-чизы и свежие десерты. И конечно кофе.",telegramEmbed:"https://t.me/teplo_coffeeroutes/4?embed=1",rating:4.8,tags:["center","with-food","rating"]},
@@ -147,7 +142,6 @@ function initEventHandlers(){
     applyFilters();
   }));
   document.getElementById('metro-filter').addEventListener('change',applyFilters);
-  document.getElementById('route-mode').addEventListener('change', function(){ routeMode=this.value; });
   document.querySelector('.user-location-btn').addEventListener('click',locateUser);
 }
 
@@ -196,17 +190,15 @@ function addUserMarker(coords){
   map.geoObjects.add(userMarker); map.setCenter(coords,14,{duration:500});
 }
 
-// Функция построения маршрута
+// Построение маршрута через внешние Яндекс.Карты
 function routeTo(endCoords){
-  if(!userCoords){alert("Сначала определите ваше местоположение!"); return;}
-  if(route){map.geoObjects.remove(route);}
-  ymaps.route([userCoords, endCoords], {routingMode: routeMode}).then(r=>{
-    route=r;
-    map.geoObjects.add(route);
-    map.setBounds(route.getBounds(), { checkZoomRange:true });
-  }, err=>{
-    alert("Не удалось построить маршрут: "+err.message);
-  });
+  if(!userCoords){
+    alert("Сначала определите ваше местоположение!");
+    return;
+  }
+  const routeMode = "auto"; // "auto", "pedestrian", "masstransit", "bicycle"
+  const url = `https://yandex.ru/maps/?rtext=${userCoords[0]},${userCoords[1]}~${endCoords[0]},${endCoords[1]}&rtt=${routeMode}`;
+  window.open(url,'_blank');
 }
 </script>
 </body>
