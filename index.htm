@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <title>Где найти своё Тепло</title>
-<script src="https://api-maps.yandex.ru/2.1/?lang=ru_RU&load=package.full"></script>
+<script src="https://api-maps.yandex.ru/2.1/?lang=ru_RU&load=package.full" type="text/javascript"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 <style>
@@ -194,20 +194,21 @@ function addUserMarker(coords){
   map.geoObjects.add(userMarker); map.setCenter(coords,14,{duration:500});
 }
 
-function routeTo(lat, lon){
-  if(!userMarker){ alert("Сначала определите своё местоположение"); return; }
-  const userCoords = userMarker.geometry.getCoordinates();
-
-  ymaps.route([userCoords, [lat, lon]]).then(route=>{
-    map.geoObjects.add(route);
-    map.setBounds(route.getBounds(), {checkZoomRange:true});
-  }, error=>{
-    alert("Не удалось построить маршрут: " + error.message);
-  });
-}
+// Строим маршрут
+    function buildRoute(start, end){
+      if(route){ map.geoObjects.remove(route); }
+      ymaps.route([start, end]).then(r=>{
+        route = r;
+        map.geoObjects.add(route);
+        map.setBounds(route.getBounds(), { checkZoomRange: true });
+      }, err=>{
+        alert("Не удалось построить маршрут: " + err.message);
+      });
+    }
 </script>
 </body>
 </html>
+
 
 
 
