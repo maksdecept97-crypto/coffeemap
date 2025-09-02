@@ -3,11 +3,10 @@
 <head>
 <meta charset="utf-8">
 <title>Где найти своё Тепло</title>
-<script src="https://api-maps.yandex.ru/2.1/?lang=ru_RU&load=package.full" type="text/javascript"></script>
+<script src="https://api-maps.yandex.ru/2.1/?lang=ru_RU" type="text/javascript"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 <style>
-/* Весь твой CSS остаётся без изменений */
 *{box-sizing:border-box;margin:0;padding:0;}
 body{font-family:'Segoe UI', Tahoma, Geneva, Verdana,sans-serif;height:100vh;display:flex;flex-direction:column;}
 .header{background-color:#3c1b0b;color:white;padding:15px 20px;display:flex;justify-content:space-between;align-items:center;box-shadow:0 2px 5px rgba(0,0,0,0.2);}
@@ -57,10 +56,10 @@ body{font-family:'Segoe UI', Tahoma, Geneva, Verdana,sans-serif;height:100vh;dis
   <button class="filter-btn" data-filter="with-food">С едой</button>
   <select id="metro-filter">
     <option value="">Метро (выберите)</option>
-    <option value="59.935497, 30.327139">Невский проспект</option>
-    <option value="59.927636, 30.347917">Владимирская</option>
-    <option value="59.956157, 30.318796">Горьковская</option>
-    <option value="59.944542, 30.359965">Чернышевская</option>
+    <option value="59.935497,30.327139">Невский проспект</option>
+    <option value="59.927636,30.347917">Владимирская</option>
+    <option value="59.956157,30.318796">Горьковская</option>
+    <option value="59.944542,30.359965">Чернышевская</option>
   </select>
 </div>
 
@@ -73,13 +72,13 @@ body{font-family:'Segoe UI', Tahoma, Geneva, Verdana,sans-serif;height:100vh;dis
 
 <script>
 ymaps.ready(init);
-let map, coffeePlaces=[], userMarker=null, metroCircle=null, userCoords=null, currentRoute=null;
+let map, coffeePlaces=[], userMarker=null, metroCircle=null;
 
 const coffeeData = [
   {id:1,name:"Tour Coffee",coordinates:[59.911946,30.316499],address:"7-я Красноармейская ул., 5Д",description:"Tour coffee — это предвкушение каждый раз чего-то нового: разные сорта, разные обжарщики. Здесь подают гриль-чизы и свежие десерты. И конечно кофе.",telegramEmbed:"https://t.me/teplo_coffeeroutes/4?embed=1",rating:4.8,tags:["center","with-food","rating"]},
   {id:2,name:"UNIC",coordinates:[59.960012,30.311556],address:"ул. Кронверская, 12",description:"UNIC — место, куда хочется приходить за едой и кофе.",telegramEmbed:"https://t.me/teplo_coffeeroutes/8?embed=1",rating:4.7,tags:["center","with-food"]},
-  {id:3,name:"Verlé",coordinates:[59.963493, 30.314817],address:"Каменноостровский пр-т, 25/2",description:"Уютное место с отличным кофе и атмосферой.",telegramEmbed:"https://t.me/teplo_coffeeroutes/15?embed=1",rating:4.5,tags:["center"]},
-  {id:4,name:"Щегол",coordinates:[59.941899, 30.363427],address:"ул. Радищева, 38/20",description:"Уютная кофейня с тёплым, домашним дизайном, куда хочется заходить в любое время года. Приятные тона, мягкий свет и маленькие цветы на каждом столике создают ощущение, что о тебе здесь заботятся.",telegramEmbed:"https://t.me/teplo_coffeeroutes/22?embed=1",rating:4.9,tags:["rating","with-food"]}
+  {id:3,name:"Verlé",coordinates:[59.963493,30.314817],address:"Каменноостровский пр-т, 25/2",description:"Уютное место с отличным кофе и атмосферой.",telegramEmbed:"https://t.me/teplo_coffeeroutes/15?embed=1",rating:4.5,tags:["center"]},
+  {id:4,name:"Щегол",coordinates:[59.941899,30.363427],address:"ул. Радищева, 38/20",description:"Уютная кофейня с тёплым, домашним дизайном, куда хочется заходить в любое время года. Приятные тона, мягкий свет и маленькие цветы на каждом столике создают ощущение, что о тебе здесь заботятся.",telegramEmbed:"https://t.me/teplo_coffeeroutes/22?embed=1",rating:4.9,tags:["rating","with-food"]}
 ];
 
 function init(){
@@ -103,7 +102,7 @@ function addCoffeePlaces(){
             <div class="balloon-rating">Рейтинг: ${coffee.rating} ★</div>
             <iframe class="telegram-embed" src="${coffee.telegramEmbed}"></iframe>
             <div class="balloon-footer">
-              <button class="balloon-btn" onclick="routeToCoffee([${coffee.coordinates}])">Маршрут</button>
+              <button class="balloon-btn" onclick="routeTo(${coffee.coordinates[0]},${coffee.coordinates[1]})">Маршрут</button>
             </div>
           </div>
         </div>`
@@ -179,38 +178,26 @@ function applyFilters(){
 function locateUser(){
   if(!navigator.geolocation){alert("Геолокация не поддерживается вашим браузером."); return;}
   navigator.geolocation.getCurrentPosition(pos=>{
-    userCoords=[pos.coords.latitude,pos.coords.longitude];
-    addUserMarker(userCoords);
-  },err=>{console.error(err); alert("Не удалось определить местоположение.");},{enableHighAccuracy:true,timeout:5000});
+    const coords=[pos.coords.latitude,pos.coords.longitude]; addUserMarker(coords);
+  },err=>{console.error("Ошибка геолокации:",err); alert("Не удалось определить местоположение. Используйте HTTPS и разрешите геолокацию.");},{enableHighAccuracy:true,timeout:5000});
 }
 
 function addUserMarker(coords){
   if(userMarker){map.geoObjects.remove(userMarker);}
   userMarker=new ymaps.Placemark(coords,{balloonContent:'Вы здесь'},{preset:'islands#circleIcon',iconColor:'#3399ff'});
-  map.geoObjects.add(userMarker);
-  map.setCenter(coords,14,{duration:500});
+  map.geoObjects.add(userMarker); map.setCenter(coords,14,{duration:500});
 }
 
-// === Строим маршрут ===
-function routeToCoffee(endCoords){
-  if(!userCoords){
-    alert("Сначала определите своё местоположение!");
-    return;
-  }
-
-  if(currentRoute){map.geoObjects.remove(currentRoute);}
-
-  ymaps.route([userCoords, endCoords], {routingMode:'auto'}).then(r => {
-    currentRoute = r;
-    map.geoObjects.add(currentRoute);
-    map.setBounds(currentRoute.getBounds(), { checkZoomRange: true });
-
-    const distance = r.getLength(); // метры
-    const time = r.getTime();       // секунды
-    alert(`Маршрут построен!\nРасстояние: ${Math.round(distance)} м\nВремя: ${Math.round(time/60)} мин`);
-  }, err => {
-    alert("Не удалось построить маршрут: " + err.message);
-  });
+// Новая функция маршрута через Яндекс.Карты в новой вкладке
+function routeTo(lat, lon) {
+    if (!userMarker) {
+        alert("Сначала определите своё местоположение!");
+        return;
+    }
+    const userCoords = userMarker.geometry.getCoordinates();
+    const rtext = `${userCoords[0]},${userCoords[1]}~${lat},${lon}`;
+    const url = `https://yandex.ru/maps/?rtext=${rtext}&rtt=mt`;
+    window.open(url, "_blank");
 }
 </script>
 </body>
