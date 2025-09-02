@@ -73,8 +73,7 @@ body{font-family:'Segoe UI', Tahoma, Geneva, Verdana,sans-serif;height:100vh;dis
 <script>
 ymaps.ready(init);
 let map, coffeePlaces=[], userMarker=null, metroCircle=null;
-let route = null;
-let userCoords = null;
+let userCoords = null, route = null, routeInfoContainer = null;
 
 const coffeeData = [
   {id:1,name:"Tour Coffee",coordinates:[59.911946,30.316499],address:"7-я Красноармейская ул., 5Д",description:"Tour coffee — это предвкушение каждый раз чего-то нового: разные сорта, разные обжарщики. Здесь подают гриль-чизы и свежие десерты. И конечно кофе.",telegramEmbed:"https://t.me/teplo_coffeeroutes/4?embed=1",rating:4.8,tags:["center","with-food","rating"]},
@@ -104,7 +103,7 @@ function addCoffeePlaces(){
             <div class="balloon-rating">Рейтинг: ${coffee.rating} ★</div>
             <iframe class="telegram-embed" src="${coffee.telegramEmbed}"></iframe>
             <div class="balloon-footer">
-              <button class="balloon-btn" onclick="buildRoute([${coffee.coordinates[0]}, ${coffee.coordinates[1]}])">Маршрут</button>
+              <button class="balloon-btn" onclick="buildRoute([${coffee.coordinates[0]},${coffee.coordinates[1]}])">Маршрут</button>
             </div>
           </div>
         </div>`
@@ -164,13 +163,8 @@ function applyFilters(){
     const name=cp.data.name.toLowerCase(), addr=cp.data.address.toLowerCase();
     let visible=true;
 
-    // Поиск
     if(searchText && !name.includes(searchText) && !addr.includes(searchText)) visible=false;
-
-    // Тег
     if(activeFilter!=='all' && !cp.data.tags.includes(activeFilter)) visible=false;
-
-    // Метро
     if(metroCoords){
       const dist=ymaps.coordSystem.geo.getDistance(cp.data.coordinates,metroCoords);
       if(dist>radiusMeters) visible=false;
@@ -185,7 +179,7 @@ function applyFilters(){
 function locateUser(){
   if(!navigator.geolocation){alert("Геолокация не поддерживается вашим браузером."); return;}
   navigator.geolocation.getCurrentPosition(pos=>{
-    userCoords = [pos.coords.latitude,pos.coords.longitude];
+    userCoords=[pos.coords.latitude,pos.coords.longitude]; 
     addUserMarker(userCoords);
   },err=>{console.error("Ошибка геолокации:",err); alert("Не удалось определить местоположение. Используйте HTTPS и разрешите геолокацию.");},{enableHighAccuracy:true,timeout:5000});
 }
@@ -193,14 +187,15 @@ function locateUser(){
 function addUserMarker(coords){
   if(userMarker){map.geoObjects.remove(userMarker);}
   userMarker=new ymaps.Placemark(coords,{balloonContent:'Вы здесь'},{preset:'islands#circleIcon',iconColor:'#3399ff'});
-  map.geoObjects.add(userMarker); map.setCenter(coords,14,{duration:500});
+  map.geoObjects.add(userMarker); 
+  map.setCenter(coords,14,{duration:500});
 }
 
-// Построение маршрута через серверный API с удалением старого маршрута
+// Построение маршрута через серверный API
 function buildRoute(endCoords) {
   if (!userCoords) { alert("Сначала нужно определить ваше местоположение!"); return; }
 
-  if (route) map.geoObjects.remove(route); // удаляем старый маршрут
+  if (route) { map.geoObjects.remove(route); routeInfoContainer?.remove(); }
 
   const apiKey = '06130ffa-60a3-4552-964a-3cb44f1ed0b3';
   const url = `https://api.routing.yandex.net/v2/route?apikey=${apiKey}&waypoints=${userCoords[0]},${userCoords[1]}|${endCoords[0]},${endCoords[1]}&mode=driving`;
@@ -213,12 +208,29 @@ function buildRoute(endCoords) {
       const coords = [];
       data.routes[0].legs[0].steps.forEach(step => step.path.forEach(p => coords.push([p[0], p[1]])));
 
-      route = new ymaps.Polyline(coords, {
-        balloonContent: `Расстояние: ${Math.round(data.routes[0].legs[0].distance)} м, Время: ${Math.round(data.routes[0].legs[0].duration/60)} мин`
-      }, {strokeColor:"#3c1b0b", strokeWidth:5, strokeOpacity:0.7});
-
+      route = new ymaps.Polyline(coords, {}, {strokeColor:"#3c1b0b", strokeWidth:5, strokeOpacity:0.7});
       map.geoObjects.add(route);
       map.setBounds(route.getBounds(), {checkZoomRange:true});
+
+      const distance = Math.round(data.routes[0].legs[0].distance);
+      const durationMin = Math.round(data.routes[0].legs[0].duration/60);
+
+      routeInfoContainer = document.createElement('div');
+      routeInfoContainer.style.position = 'absolute';
+      routeInfoContainer.style.bottom = '10px';
+      routeInfoContainer.style.left = '50%';
+      routeInfoContainer.style.transform = 'translateX(-50%)';
+      routeInfoContainer.style.background = 'rgba(60,27,11,0.9)';
+      routeInfoContainer.style.color = 'white';
+      routeInfoContainer.style.padding = '10px 20px';
+      routeInfoContainer.style.borderRadius = '8px';
+      routeInfoContainer.style.fontSize = '14px';
+      routeInfoContainer.style.zIndex = '2000';
+      routeInfoContainer.innerHTML = `Расстояние: ${distance} м, Время в пути: ${durationMin} мин`;
+      document.body.appendChild(routeInfoContainer);
+
+      // Автоудаление через 15 секунд
+      setTimeout(()=>{routeInfoContainer?.remove();},15000);
     })
     .catch(err => {console.error(err); alert("Ошибка при построении маршрута.");});
 }
