@@ -194,10 +194,21 @@ function addUserMarker(coords){
   map.geoObjects.add(userMarker); map.setCenter(coords,14,{duration:500});
 }
 
-function routeTo(lat,lon){alert(`Маршрут будет построен к координатам: ${lat}, ${lon}`);}
+function routeTo(lat, lon){
+  if(!userMarker){ alert("Сначала определите своё местоположение"); return; }
+  const userCoords = userMarker.geometry.getCoordinates();
+
+  ymaps.route([userCoords, [lat, lon]]).then(route=>{
+    map.geoObjects.add(route);
+    map.setBounds(route.getBounds(), {checkZoomRange:true});
+  }, error=>{
+    alert("Не удалось построить маршрут: " + error.message);
+  });
+}
 </script>
 </body>
 </html>
+
 
 
 
