@@ -7,6 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 <style>
+/* Весь твой CSS остаётся без изменений */
 *{box-sizing:border-box;margin:0;padding:0;}
 body{font-family:'Segoe UI', Tahoma, Geneva, Verdana,sans-serif;height:100vh;display:flex;flex-direction:column;}
 .header{background-color:#3c1b0b;color:white;padding:15px 20px;display:flex;justify-content:space-between;align-items:center;box-shadow:0 2px 5px rgba(0,0,0,0.2);}
@@ -72,8 +73,7 @@ body{font-family:'Segoe UI', Tahoma, Geneva, Verdana,sans-serif;height:100vh;dis
 
 <script>
 ymaps.ready(init);
-let map, coffeePlaces=[], userMarker=null, metroCircle=null;
-let userCoords = null, route = null, routeInfoContainer = null;
+let map, coffeePlaces=[], userMarker=null, metroCircle=null, userCoords=null, currentRoute=null;
 
 const coffeeData = [
   {id:1,name:"Tour Coffee",coordinates:[59.911946,30.316499],address:"7-я Красноармейская ул., 5Д",description:"Tour coffee — это предвкушение каждый раз чего-то нового: разные сорта, разные обжарщики. Здесь подают гриль-чизы и свежие десерты. И конечно кофе.",telegramEmbed:"https://t.me/teplo_coffeeroutes/4?embed=1",rating:4.8,tags:["center","with-food","rating"]},
@@ -103,7 +103,7 @@ function addCoffeePlaces(){
             <div class="balloon-rating">Рейтинг: ${coffee.rating} ★</div>
             <iframe class="telegram-embed" src="${coffee.telegramEmbed}"></iframe>
             <div class="balloon-footer">
-              <button class="balloon-btn" onclick="buildRoute([${coffee.coordinates[0]},${coffee.coordinates[1]}])">Маршрут</button>
+              <button class="balloon-btn" onclick="routeToCoffee([${coffee.coordinates}])">Маршрут</button>
             </div>
           </div>
         </div>`
@@ -179,60 +179,38 @@ function applyFilters(){
 function locateUser(){
   if(!navigator.geolocation){alert("Геолокация не поддерживается вашим браузером."); return;}
   navigator.geolocation.getCurrentPosition(pos=>{
-    userCoords=[pos.coords.latitude,pos.coords.longitude]; 
+    userCoords=[pos.coords.latitude,pos.coords.longitude];
     addUserMarker(userCoords);
-  },err=>{console.error("Ошибка геолокации:",err); alert("Не удалось определить местоположение. Используйте HTTPS и разрешите геолокацию.");},{enableHighAccuracy:true,timeout:5000});
+  },err=>{console.error(err); alert("Не удалось определить местоположение.");},{enableHighAccuracy:true,timeout:5000});
 }
 
 function addUserMarker(coords){
   if(userMarker){map.geoObjects.remove(userMarker);}
   userMarker=new ymaps.Placemark(coords,{balloonContent:'Вы здесь'},{preset:'islands#circleIcon',iconColor:'#3399ff'});
-  map.geoObjects.add(userMarker); 
+  map.geoObjects.add(userMarker);
   map.setCenter(coords,14,{duration:500});
 }
 
-// Построение маршрута через серверный API
-function buildRoute(endCoords) {
-  if (!userCoords) { alert("Сначала нужно определить ваше местоположение!"); return; }
+// === Строим маршрут ===
+function routeToCoffee(endCoords){
+  if(!userCoords){
+    alert("Сначала определите своё местоположение!");
+    return;
+  }
 
-  if (route) { map.geoObjects.remove(route); routeInfoContainer?.remove(); }
+  if(currentRoute){map.geoObjects.remove(currentRoute);}
 
-  const apiKey = '06130ffa-60a3-4552-964a-3cb44f1ed0b3';
-  const url = `https://api.routing.yandex.net/v2/route?apikey=${apiKey}&waypoints=${userCoords[0]},${userCoords[1]}|${endCoords[0]},${endCoords[1]}&mode=driving`;
+  ymaps.route([userCoords, endCoords], {routingMode:'auto'}).then(r => {
+    currentRoute = r;
+    map.geoObjects.add(currentRoute);
+    map.setBounds(currentRoute.getBounds(), { checkZoomRange: true });
 
-  fetch(url)
-    .then(res => res.json())
-    .then(data => {
-      if (!data.routes || !data.routes.length) { alert("Не удалось построить маршрут."); return; }
-
-      const coords = [];
-      data.routes[0].legs[0].steps.forEach(step => step.path.forEach(p => coords.push([p[0], p[1]])));
-
-      route = new ymaps.Polyline(coords, {}, {strokeColor:"#3c1b0b", strokeWidth:5, strokeOpacity:0.7});
-      map.geoObjects.add(route);
-      map.setBounds(route.getBounds(), {checkZoomRange:true});
-
-      const distance = Math.round(data.routes[0].legs[0].distance);
-      const durationMin = Math.round(data.routes[0].legs[0].duration/60);
-
-      routeInfoContainer = document.createElement('div');
-      routeInfoContainer.style.position = 'absolute';
-      routeInfoContainer.style.bottom = '10px';
-      routeInfoContainer.style.left = '50%';
-      routeInfoContainer.style.transform = 'translateX(-50%)';
-      routeInfoContainer.style.background = 'rgba(60,27,11,0.9)';
-      routeInfoContainer.style.color = 'white';
-      routeInfoContainer.style.padding = '10px 20px';
-      routeInfoContainer.style.borderRadius = '8px';
-      routeInfoContainer.style.fontSize = '14px';
-      routeInfoContainer.style.zIndex = '2000';
-      routeInfoContainer.innerHTML = `Расстояние: ${distance} м, Время в пути: ${durationMin} мин`;
-      document.body.appendChild(routeInfoContainer);
-
-      // Автоудаление через 15 секунд
-      setTimeout(()=>{routeInfoContainer?.remove();},15000);
-    })
-    .catch(err => {console.error(err); alert("Ошибка при построении маршрута.");});
+    const distance = r.getLength(); // метры
+    const time = r.getTime();       // секунды
+    alert(`Маршрут построен!\nРасстояние: ${Math.round(distance)} м\nВремя: ${Math.round(time/60)} мин`);
+  }, err => {
+    alert("Не удалось построить маршрут: " + err.message);
+  });
 }
 </script>
 </body>
