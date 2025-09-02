@@ -3,6 +3,7 @@
 <head>
 <meta charset="utf-8">
 <title>Где найти своё Тепло</title>
+<!-- РЕКОМЕНДУЕМАЯ правка: добавь apikey=... -->
 <script src="https://api-maps.yandex.ru/2.1/?lang=ru_RU&load=package.full" type="text/javascript"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -43,7 +44,7 @@ body{font-family:'Segoe UI', Tahoma, Geneva, Verdana,sans-serif;height:100vh;dis
 <body>
 
 <div class="header">
-  <h1><i class="fas fa-mug-hot"></i> Где найти своё Тепло</h1>
+  <h1><i class="fas fa-mуг-hot"></i> Где найти своё Тепло</h1>
   <div class="search-container">
     <input type="text" class="search-box" placeholder="Поиск кофеен...">
   </div>
@@ -75,10 +76,10 @@ ymaps.ready(init);
 let map, coffeePlaces=[], userMarker=null, userCoords=null, route=null, metroCircle=null;
 
 const coffeeData = [
-  {id:1,name:"Tour Coffee",coordinates:[59.911946,30.316499],address:"7-я Красноармейская ул., 5Д",description:"Tour coffee — это предвкушение каждый раз чего-то нового.",telegramEmbed:"https://t.me/teplo_coffeeroutes/4?embed=1",rating:4.8,tags:["center","with-food","rating"]},
+  {id:1,name:"Tour Coffee",coordinates:[59.911946,30.316499],address:"7-я Красноармейская ул., 5Д",description:"Tour coffee — это предвкушение каждый раз чего-то нового: разные сорта, разные обжарщики. Здесь подают гриль-чизы и свежие десерты. И конечно кофе.",telegramEmbed:"https://t.me/teplo_coffeeroutes/4?embed=1",rating:4.8,tags:["center","with-food","rating"]},
   {id:2,name:"UNIC",coordinates:[59.960012,30.311556],address:"ул. Кронверская, 12",description:"UNIC — место, куда хочется приходить за едой и кофе.",telegramEmbed:"https://t.me/teplo_coffeeroutes/8?embed=1",rating:4.7,tags:["center","with-food"]},
-  {id:3,name:"Verlé",coordinates:[59.963493, 30.314817],address:"Каменноостровский пр-т, 25/2",description:"Уютное место с отличным кофе.",telegramEmbed:"https://t.me/teplo_coffeeroutes/15?embed=1",rating:4.5,tags:["center"]},
-  {id:4,name:"Щегол",coordinates:[59.941899, 30.363427],address:"ул. Радищева, 38/20",description:"Уютная кофейня с домашним дизайном.",telegramEmbed:"https://t.me/teplo_coffeeroutes/22?embed=1",rating:4.9,tags:["rating","with-food"]}
+  {id:3,name:"Verlé",coordinates:[59.963493,30.314817],address:"Каменноостровский пр-т, 25/2",description:"Уютное место с отличным кофе и атмосферой.",telegramEmbed:"https://t.me/teplo_coffeeroutes/15?embed=1",rating:4.5,tags:["center"]},
+  {id:4,name:"Щегол",coordinates:[59.941899,30.363427],address:"ул. Радищева, 38/20",description:"Уютная кофейня с тёплым, домашним дизайном.",telegramEmbed:"https://t.me/teplo_coffeeroutes/22?embed=1",rating:4.9,tags:["rating","with-food"]}
 ];
 
 function init(){
@@ -86,7 +87,7 @@ function init(){
   addCoffeePlaces();
   renderCoffeeList();
   initEventHandlers();
-  locateUser();
+  locateUser(); // определяем userCoords
 }
 
 function addCoffeePlaces(){
@@ -180,7 +181,10 @@ function locateUser(){
   navigator.geolocation.getCurrentPosition(pos=>{
     userCoords=[pos.coords.latitude,pos.coords.longitude];
     addUserMarker(userCoords);
-  },err=>{console.error("Ошибка геолокации:",err); alert("Не удалось определить местоположение. Используйте HTTPS и разрешите геолокацию.");},{enableHighAccuracy:true,timeout:5000});
+  },err=>{
+    console.error("Ошибка геолокации:",err);
+    alert("Не удалось определить местоположение. Откройте сайт по HTTPS и разрешите геолокацию.");
+  },{enableHighAccuracy:true,timeout:8000});
 }
 
 function addUserMarker(coords){
@@ -189,18 +193,51 @@ function addUserMarker(coords){
   map.geoObjects.add(userMarker); map.setCenter(coords,14,{duration:500});
 }
 
-// КНОПКА "МАРШРУТ" В БАЛУНЕ
-function routeTo(endCoords){
-  if(!userCoords){alert("Сначала определите своё местоположение."); return;}
-  if(route) map.geoObjects.remove(route);
+/* ============== ПОСТРОЕНИЕ МАРШРУТА ============== */
 
-  ymaps.route([userCoords, endCoords]).then(r=>{
-    route=r;
+// режим маршрута по умолчанию (auto | masstransit | pedestrian | bicycle)
+let routeMode = 'auto';
+
+// основная функция для кнопки "Маршрут" в балуне
+function routeTo(endCoords){
+  if(!userCoords){
+    alert("Сначала определите своё местоположение (кнопка справа снизу).");
+    return;
+  }
+  // очищаем предыдущий маршрут
+  if(route){ try{ map.geoObjects.remove(route); }catch(e){} route=null; }
+
+  try {
+    route = new ymaps.multiRouter.MultiRoute(
+      { referencePoints: [userCoords, endCoords], params: { routingMode: routeMode } },
+      { boundsAutoApply: true }
+    );
+
+    // успешный ответ
+    route.model.events.add('requestsuccess', function(){ /* можно показать инфо о времени/длине */ });
+
+    // отлов ошибок (в т.ч. scripterror)
+    route.model.events.add('requestfail', function(e){
+      const err = e.get('error');
+      console.error('MultiRoute requestfail:', err);
+      fallbackExternalRoute(userCoords, endCoords, routeMode);
+    });
+
     map.geoObjects.add(route);
-    map.setBounds(route.getBounds(),{checkZoomRange:true});
-  }).catch(err=>{
-    alert("Не удалось построить маршрут: " + err.message);
-  });
+  } catch (e) {
+    console.error('MultiRoute exception:', e);
+    fallbackExternalRoute(userCoords, endCoords, routeMode);
+  }
+}
+
+// запасной вариант: открыть маршрут во внешних Яндекс.Картах
+function fallbackExternalRoute(start, end, mode){
+  // mode: auto | masstransit | pedestrian | bicycle
+  const rtt = (mode === 'masstransit') ? 'mt' : (mode === 'pedestrian') ? 'pd' : (mode === 'bicycle') ? 'bicycle' : 'auto';
+  const url = `https://yandex.ru/maps/?rtext=${start[0]},${start[1]}~${end[0]},${end[1]}&rtt=${rtt}`;
+  // открываем в новой вкладке и уведомляем пользователя
+  window.open(url, '_blank');
+  alert('Не удалось построить маршрут внутри карты (возможна блокировка роутинга). Открыл маршрут во внешних Яндекс.Картах.');
 }
 </script>
 </body>
