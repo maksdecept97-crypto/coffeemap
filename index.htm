@@ -56,10 +56,10 @@ body{font-family:'Segoe UI', Tahoma, Geneva, Verdana,sans-serif;height:100vh;dis
   <button class="filter-btn" data-filter="with-food">С едой</button>
   <select id="metro-filter">
     <option value="">Метро (выберите)</option>
-    <option value="59.935497,30.327139">Невский проспект</option>
-    <option value="59.927636,30.347917">Владимирская</option>
-    <option value="59.956157,30.318796">Горьковская</option>
-    <option value="59.944542,30.359965">Чернышевская</option>
+    <option value="59.935497, 30.327139">Невский проспект</option>
+    <option value="59.927636, 30.347917">Владимирская</option>
+    <option value="59.956157, 30.318796">Горьковская</option>
+    <option value="59.944542, 30.359965">Чернышевская</option>
   </select>
 </div>
 
@@ -72,14 +72,15 @@ body{font-family:'Segoe UI', Tahoma, Geneva, Verdana,sans-serif;height:100vh;dis
 
 <script>
 ymaps.ready(init);
-
-let map, coffeePlaces=[], userMarker=null, userCoords=null, metroCircle=null;
+let map, coffeePlaces=[], userMarker=null, metroCircle=null;
+let route = null;
+let userCoords = null;
 
 const coffeeData = [
   {id:1,name:"Tour Coffee",coordinates:[59.911946,30.316499],address:"7-я Красноармейская ул., 5Д",description:"Tour coffee — это предвкушение каждый раз чего-то нового: разные сорта, разные обжарщики. Здесь подают гриль-чизы и свежие десерты. И конечно кофе.",telegramEmbed:"https://t.me/teplo_coffeeroutes/4?embed=1",rating:4.8,tags:["center","with-food","rating"]},
   {id:2,name:"UNIC",coordinates:[59.960012,30.311556],address:"ул. Кронверская, 12",description:"UNIC — место, куда хочется приходить за едой и кофе.",telegramEmbed:"https://t.me/teplo_coffeeroutes/8?embed=1",rating:4.7,tags:["center","with-food"]},
-  {id:3,name:"Verlé",coordinates:[59.963493,30.314817],address:"Каменноостровский пр-т, 25/2",description:"Уютное место с отличным кофе и атмосферой.",telegramEmbed:"https://t.me/teplo_coffeeroutes/15?embed=1",rating:4.5,tags:["center"]},
-  {id:4,name:"Щегол",coordinates:[59.941899,30.363427],address:"ул. Радищева, 38/20",description:"Уютная кофейня с тёплым, домашним дизайном, куда хочется заходить в любое время года. Приятные тона, мягкий свет и маленькие цветы на каждом столике создают ощущение, что о тебе здесь заботятся.",telegramEmbed:"https://t.me/teplo_coffeeroutes/22?embed=1",rating:4.9,tags:["rating","with-food"]}
+  {id:3,name:"Verlé",coordinates:[59.963493, 30.314817],address:"Каменноостровский пр-т, 25/2",description:"Уютное место с отличным кофе и атмосферой.",telegramEmbed:"https://t.me/teplo_coffeeroutes/15?embed=1",rating:4.5,tags:["center"]},
+  {id:4,name:"Щегол",coordinates:[59.941899, 30.363427],address:"ул. Радищева, 38/20",description:"Уютная кофейня с тёплым, домашним дизайном, куда хочется заходить в любое время года. Приятные тона, мягкий свет и маленькие цветы на каждом столике создают ощущение, что о тебе здесь заботятся.",telegramEmbed:"https://t.me/teplo_coffeeroutes/22?embed=1",rating:4.9,tags:["rating","with-food"]}
 ];
 
 function init(){
@@ -103,7 +104,7 @@ function addCoffeePlaces(){
             <div class="balloon-rating">Рейтинг: ${coffee.rating} ★</div>
             <iframe class="telegram-embed" src="${coffee.telegramEmbed}"></iframe>
             <div class="balloon-footer">
-              <button class="balloon-btn" onclick="routeTo([${coffee.coordinates}])">Маршрут</button>
+              <button class="balloon-btn" onclick="buildRoute([${coffee.coordinates[0]}, ${coffee.coordinates[1]}])">Маршрут</button>
             </div>
           </div>
         </div>`
@@ -163,8 +164,13 @@ function applyFilters(){
     const name=cp.data.name.toLowerCase(), addr=cp.data.address.toLowerCase();
     let visible=true;
 
+    // Поиск
     if(searchText && !name.includes(searchText) && !addr.includes(searchText)) visible=false;
+
+    // Тег
     if(activeFilter!=='all' && !cp.data.tags.includes(activeFilter)) visible=false;
+
+    // Метро
     if(metroCoords){
       const dist=ymaps.coordSystem.geo.getDistance(cp.data.coordinates,metroCoords);
       if(dist>radiusMeters) visible=false;
@@ -179,7 +185,7 @@ function applyFilters(){
 function locateUser(){
   if(!navigator.geolocation){alert("Геолокация не поддерживается вашим браузером."); return;}
   navigator.geolocation.getCurrentPosition(pos=>{
-    userCoords=[pos.coords.latitude,pos.coords.longitude]; 
+    userCoords = [pos.coords.latitude,pos.coords.longitude];
     addUserMarker(userCoords);
   },err=>{console.error("Ошибка геолокации:",err); alert("Не удалось определить местоположение. Используйте HTTPS и разрешите геолокацию.");},{enableHighAccuracy:true,timeout:5000});
 }
@@ -190,15 +196,31 @@ function addUserMarker(coords){
   map.geoObjects.add(userMarker); map.setCenter(coords,14,{duration:500});
 }
 
-// Построение маршрута через внешние Яндекс.Карты
-function routeTo(endCoords){
-  if(!userCoords){
-    alert("Сначала определите ваше местоположение!");
-    return;
-  }
-  const routeMode = "auto"; // "auto", "pedestrian", "masstransit", "bicycle"
-  const url = `https://yandex.ru/maps/?rtext=${userCoords[0]},${userCoords[1]}~${endCoords[0]},${endCoords[1]}&rtt=${routeMode}`;
-  window.open(url,'_blank');
+// Построение маршрута через серверный API с удалением старого маршрута
+function buildRoute(endCoords) {
+  if (!userCoords) { alert("Сначала нужно определить ваше местоположение!"); return; }
+
+  if (route) map.geoObjects.remove(route); // удаляем старый маршрут
+
+  const apiKey = '06130ffa-60a3-4552-964a-3cb44f1ed0b3';
+  const url = `https://api.routing.yandex.net/v2/route?apikey=${apiKey}&waypoints=${userCoords[0]},${userCoords[1]}|${endCoords[0]},${endCoords[1]}&mode=driving`;
+
+  fetch(url)
+    .then(res => res.json())
+    .then(data => {
+      if (!data.routes || !data.routes.length) { alert("Не удалось построить маршрут."); return; }
+
+      const coords = [];
+      data.routes[0].legs[0].steps.forEach(step => step.path.forEach(p => coords.push([p[0], p[1]])));
+
+      route = new ymaps.Polyline(coords, {
+        balloonContent: `Расстояние: ${Math.round(data.routes[0].legs[0].distance)} м, Время: ${Math.round(data.routes[0].legs[0].duration/60)} мин`
+      }, {strokeColor:"#3c1b0b", strokeWidth:5, strokeOpacity:0.7});
+
+      map.geoObjects.add(route);
+      map.setBounds(route.getBounds(), {checkZoomRange:true});
+    })
+    .catch(err => {console.error(err); alert("Ошибка при построении маршрута.");});
 }
 </script>
 </body>
