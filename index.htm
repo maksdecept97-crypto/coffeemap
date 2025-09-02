@@ -195,19 +195,25 @@ function addUserMarker(coords){
 }
 
 // Строим маршрут
-    function buildRoute(start, end){
-      if(route){ map.geoObjects.remove(route); }
-      ymaps.route([start, end]).then(r=>{
+    function buildRoute(endCoords) {
+      if (!userCoords) {
+        alert("Сначала нужно определить ваше местоположение!");
+        return;
+      }
+      if (route) map.geoObjects.remove(route);
+
+      ymaps.route([userCoords, endCoords]).then(r => {
         route = r;
         map.geoObjects.add(route);
         map.setBounds(route.getBounds(), { checkZoomRange: true });
-      }, err=>{
+      }, err => {
         alert("Не удалось построить маршрут: " + err.message);
       });
     }
 </script>
 </body>
 </html>
+
 
 
 
