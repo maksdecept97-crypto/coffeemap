@@ -96,7 +96,6 @@ const coffeeData = [
   {id:5,name:"Bolshecoffee roasters",coordinates:[59.927991, 30.353581],address:"ул. Марата, 22-2",description:"Bolshecoffee Roasters — это место, где вы можете насладиться ароматным кофе и вкусными десертами. Здесь вы найдете широкий выбор кофейных зерен.",telegramEmbed:"",rating:4.9,tags:["center","with-food"]},
   {id:6,name:"Сибаристика",coordinates:[59.910412, 30.284159],address:"наб. Обводного канала, 199-201К",description:"Sibaristica — это часть большого пространства, в которое входят коворкинг и школа бариста. В меню вошли почти два десятка видов кофе от классических черных до авторских — латте ройбуш, раф соленый арахис, флэт уайт, бариста-сет из трех напитков.",telegramEmbed:"",rating:5.0,tags:["center"]},
   {id:7,name:"Щегол",coordinates:[59.912521, 30.317260],address:"6-я Красноармейская ул., 1",description:"Приятная кофейня с вкусным меню и прекрасным кофе.Просторные стеклянные двери, которые распахиваются в хорошую погоду, полка во всю стену с модными журналами, аккуратные столики и стильные лампы, гармонично вписывающиеся в интерьер.",telegramEmbed:"https://t.me/teplo_coffeeroutes/22?embed=1",rating:4.9,tags:["rating","with-food"]}
-
 ];
 
 function init(){
@@ -109,22 +108,25 @@ function init(){
 
 function addCoffeePlaces(){
   coffeeData.forEach(coffee=>{
+    const balloonContentBody = `
+      <div class="balloon-scroll">
+        <div class="balloon-content">
+          <div class="balloon-header">${coffee.name}</div>
+          <div class="balloon-address">${coffee.address}</div>
+          <div class="balloon-description">${coffee.description}</div>
+          <div class="balloon-rating">Рейтинг: ${coffee.rating} ★</div>
+          ${coffee.telegramEmbed ? `<iframe class="telegram-embed" src="${coffee.telegramEmbed}"></iframe>` : ''}
+          <div class="balloon-footer">
+            <button class="balloon-btn" onclick="openRoute(${coffee.coordinates[0]},${coffee.coordinates[1]})">Маршрут</button>
+          </div>
+        </div>
+      </div>`;
+    
     const placemark = new ymaps.Placemark(coffee.coordinates,{
       balloonContentHeader: coffee.name,
-      balloonContentBody: `
-        <div class="balloon-scroll">
-          <div class="balloon-content">
-            <div class="balloon-header">${coffee.name}</div>
-            <div class="balloon-address">${coffee.address}</div>
-            <div class="balloon-description">${coffee.description}</div>
-            <div class="balloon-rating">Рейтинг: ${coffee.rating} ★</div>
-            <iframe class="telegram-embed" src="${coffee.telegramEmbed}"></iframe>
-            <div class="balloon-footer">
-              <button class="balloon-btn" onclick="openRoute(${coffee.coordinates[0]},${coffee.coordinates[1]})">Маршрут</button>
-            </div>
-          </div>
-        </div>`
+      balloonContentBody: balloonContentBody
     },{preset:'islands#icon',iconColor:'#b84114'});
+    
     coffeePlaces.push({id:coffee.id,placemark,data:coffee});
     map.geoObjects.add(placemark);
     placemark.events.add('click',()=>{highlightCoffeeItem(coffee.id);});
@@ -219,13 +221,3 @@ function openRoute(lat, lon){
 </script>
 </body>
 </html>
-
-
-
-
-
-
-
-
-
-
