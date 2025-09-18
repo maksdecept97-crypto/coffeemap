@@ -14,15 +14,12 @@ body{font-family:'Times New Roman', Courier, Verdana,sans-serif;height:100vh;dis
 .search-container{position:relative;width:100%;max-width:400px;}
 .search-box{width:100%;padding:10px 15px;border:none;border-radius:20px;font-size:1rem;}
 .filter-container{background-color:#f5f5f5;padding:10px 20px;display:flex;flex-wrap:wrap;gap:10px;border-bottom:1px solid #ddd;align-items:center;position:relative;z-index:10;}
-.show-sidebar-btn{background-color:#3c1b0b;color:white;border:none;padding:10px 15px;border-radius:4px;cursor:pointer;flex-shrink:0;transition:background 0.3s;}
-.show-sidebar-btn:hover{background-color:#2a1309;}
+.show-sidebar-btn{background-color:#3c1b0b;color:white;border:none;padding:10px 15px;border-radius:4px;cursor:pointer;order:-1;} /* Первая слева */
 .filter-btn{background-color:white;border:1px solid #ddd;border-radius:20px;padding:5px 15px;cursor:pointer;transition:all 0.3s;}
 .filter-btn:hover,.filter-btn.active{background-color:#3c1b0b;color:white;}
 #metro-filter{padding:5px 10px;border-radius:300px;border:1px solid #ccc;}
-.main-content{display:flex;flex:1;height:calc(100vh - 100px);position:relative;}
-.overlay{position:absolute;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.3);z-index:998;opacity:0;pointer-events:none;transition:opacity 0.3s;}
-.overlay.active{opacity:1;pointer-events:auto;}
-.sidebar{width:300px;background-color:white;border-right:1px solid #ddd;overflow-y:auto;display:flex;flex-direction:column;transition: transform 0.3s ease; position:fixed; left:0; top:70px; bottom:0; z-index:999; transform: translateX(-100%);}
+.main-content{display:flex;flex:1;height:calc(100vh - 100px);}
+.sidebar{width:300px;background-color:white;border-right:1px solid #ddd;overflow-y:auto;display:flex;flex-direction:column;transition: transform 0.3s ease;position:fixed;top:0;bottom:0;z-index:999;transform: translateX(-100%);}
 .sidebar.show{transform: translateX(0);}
 .coffee-list{list-style:none;padding:0;margin:0;}
 .coffee-item{padding:15px;border-bottom:1px solid #eee;cursor:pointer;transition:0.2s;}
@@ -33,7 +30,7 @@ body{font-family:'Times New Roman', Courier, Verdana,sans-serif;height:100vh;dis
 .coffee-rating{color:#ff9800;margin-top:5px;}
 #map{flex:1;height:100%;}
 .balloon-scroll{max-height:80vh;overflow-y:auto;}
-.balloon-content{padding:15px;}
+.balloon-content{padding:15px; max-width:280px;} /* Ограничение ширины для мобилки */
 .balloon-header{font-size:1.2rem;font-weight:bold;margin-bottom:10px;color:#3c1b0b;}
 .balloon-address{color:#666;margin-bottom:10px;font-size:0.9rem;}
 .balloon-description{margin-bottom:15px;line-height:1.4;}
@@ -44,10 +41,11 @@ body{font-family:'Times New Roman', Courier, Verdana,sans-serif;height:100vh;dis
 .user-location-btn{position:absolute;right:20px;bottom:30px;background-color:white;border:none;border-radius:50%;width:40px;height:40px;box-shadow:0 1px 5px rgba(0,0,0,0.3);cursor:pointer;z-index:1000;display:flex;justify-content:center;align-items:center;}
 @media(max-width:768px){
   .main-content{flex-direction:column;}
-  .sidebar{width:80%;height:calc(100vh - 70px);}
+  .sidebar{width:80%;height:auto; max-height:calc(100vh - 0px);}
   .header{flex-direction:column;gap:10px;}
   .search-container{max-width:100%;}
   .filter-container{overflow-x:auto;flex-wrap:nowrap;}
+  .balloon-content{max-width:95vw;} /* Мобильная ширина */
 }
 </style>
 </head>
@@ -89,7 +87,6 @@ body{font-family:'Times New Roman', Courier, Verdana,sans-serif;height:100vh;dis
 </div>
 
 <div class="main-content">
-  <div class="overlay"></div>
   <div class="sidebar"><ul class="coffee-list"></ul></div>
   <div id="map"></div>
 </div>
@@ -140,7 +137,8 @@ function addCoffeePlaces(){
       iconLayout:'default#image',
       iconImageHref:'https://github.com/maksdecept97-crypto/coffeemap/blob/main/point.png?raw=true',
       iconImageSize:[18,28],
-      iconImageOffset:[-20,-40]
+      iconImageOffset:[-20,-40],
+      balloonMaxWidth: '300px' // Ограничение ширины балуна
     });
 
     coffeePlaces.push({id: coffee.id, placemark, data: coffee});
@@ -179,18 +177,21 @@ function initEventHandlers(){
   document.getElementById('metro-filter').addEventListener('change',applyFilters);
   document.querySelector('.user-location-btn').addEventListener('click',locateUser);
 
-  const sidebarBtn = document.querySelector('.show-sidebar-btn');
-  const sidebar = document.querySelector('.sidebar');
-  const overlay = document.querySelector('.overlay');
+  // Кнопка показа/скрытия панели
+  document.querySelector('.show-sidebar-btn').addEventListener('click',()=>{
+    document.querySelector('.sidebar').classList.toggle('show');
+  });
 
-  sidebarBtn.addEventListener('click',()=>{
-    sidebar.classList.toggle('show');
-    overlay.classList.toggle('active');
-  });
-  overlay.addEventListener('click',()=>{
-    sidebar.classList.remove('show');
-    overlay.classList.remove('active');
-  });
+  // Корректное положение панели относительно фильтров
+  function updateSidebarTop(){
+    const filterContainer = document.querySelector('.filter-container');
+    const rect = filterContainer.getBoundingClientRect();
+    const scrollTop = window.scrollY || window.pageYOffset;
+    document.querySelector('.sidebar').style.top = (rect.bottom + scrollTop) + 'px';
+  }
+  updateSidebarTop();
+  window.addEventListener('resize', updateSidebarTop);
+  window.addEventListener('scroll', updateSidebarTop);
 }
 
 function applyFilters(){
