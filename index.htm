@@ -28,7 +28,7 @@ body{font-family:'Times New Roman', Courier, Verdana,sans-serif;height:100vh;dis
 .coffee-rating{color:#ff9800;margin-top:5px;}
 #map{flex:1;height:100%;}
 .balloon-scroll{max-height:80vh;overflow-y:auto;}
-.balloon-content{padding:15px;max-width:300px;}
+.balloon-content{padding:15px;}
 .balloon-header{font-size:1.2rem;font-weight:bold;margin-bottom:10px;color:#3c1b0b;}
 .balloon-address{color:#666;margin-bottom:10px;font-size:0.9rem;}
 .balloon-description{margin-bottom:15px;line-height:1.4;}
@@ -43,7 +43,11 @@ body{font-family:'Times New Roman', Courier, Verdana,sans-serif;height:100vh;dis
   .header{flex-direction:column;gap:10px;}
   .search-container{max-width:100%;}
   .filter-container{overflow-x:auto;flex-wrap:nowrap;}
-  .balloon-content{max-width:250px;} /* уменьшаем ширину бабла на телефоне */
+  .balloon-content{max-width:320px;} /* увеличили ширину */
+  .telegram-embed{
+    width:100% !important;  /* тянем на всю ширину */
+    height:260px;           /* немного ниже, чтобы влезал embed */
+  }
 }
 </style>
 </head>
@@ -106,12 +110,6 @@ const coffeeData = [
 
 function init(){
   map = new ymaps.Map("map",{center:[59.93,30.34], zoom:12, controls:['zoomControl','geolocationControl']});
-
-  // Добавляем отступы карты на мобильных устройствах
-  if (window.innerWidth <= 768) {
-    map.margin.setDefaultMargin([0,50,0,0]); // сверху, справа, снизу, слева
-  }
-
   addCoffeePlaces();
   renderCoffeeList();
   initEventHandlers();
