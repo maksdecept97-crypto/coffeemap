@@ -1,25 +1,172 @@
-<script>
-function init(){
-  // Инициализация карты
-  map = new ymaps.Map("map",{
-    center:[59.93,30.34],
-    zoom:12,
-    controls:['zoomControl','geolocationControl']
-  });
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<title>Где найти своё Тепло</title>
+<script src="https://api-maps.yandex.ru/2.1/?lang=ru_RU" type="text/javascript"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<style>
+/* Общие стили */
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Times New Roman', Courier, Verdana,sans-serif;height:100vh;display:flex;flex-direction:column;}
 
-  addCoffeePlaces(); // Добавление кофеен на карту
-  renderCoffeeList(); // Отрисовка списка кофеен
-  initEventHandlers(); // Обработчики кнопок и фильтров
-  locateUser(); // Определение местоположения пользователя
+/* Header */
+.header{background-color:#361909;color:#f2e4dc;padding:15px 20px;display:flex;justify-content:space-between;align-items:center;box-shadow:0 2px 5px rgba(0,0,0,0.2);}
+.header h1{font-size:1.5rem;}
+.search-container{position:relative;width:100%;max-width:400px;}
+.search-box{width:100%;padding:10px 15px;border:none;border-radius:20px;font-size:1rem;}
 
-  // Клик по карте закрывает все балуны и скрывает overlay
-  map.events.add('click', () => {
-    coffeePlaces.forEach(cp => cp.placemark.balloon.close());
-    hideOverlay();
-  });
+/* Фильтры */
+.filter-container{background-color:#f5f5f5;padding:10px 20px;display:flex;flex-wrap:wrap;gap:10px;border-bottom:1px solid #ddd;align-items:center;position:relative;z-index:1001;}
+.filter-btn{background-color:white;border:1px solid #ddd;border-radius:20px;padding:5px 15px;cursor:pointer;transition:all 0.3s;}
+.filter-btn:hover,.filter-btn.active{background-color:#3c1b0b;color:white;}
+#metro-filter{padding:5px 10px;border-radius:300px;border:1px solid #ccc;}
+
+/* Sidebar */
+.main-content{display:flex;flex:1;height:calc(100vh - 100px);}
+.sidebar{
+  width:300px;
+  background-color:white;
+  border-right:1px solid #ddd;
+  overflow-y:auto;
+  display:flex;
+  flex-direction:column;
+  transition: transform 0.3s ease;
+  position:fixed;
+  left:0;
+  top:100px; /* чтобы быть под фильтрами */
+  bottom:0;
+  z-index:999;
+  transform: translateX(-100%);
+}
+.sidebar.show{transform: translateX(0);}
+.coffee-list{list-style:none;padding:0;margin:0;}
+.coffee-item{padding:15px;border-bottom:1px solid #eee;cursor:pointer;transition:0.2s;}
+.coffee-item:hover{background-color:#f9f9f9;}
+.coffee-item.active{background-color:#f0e6d8;}
+.coffee-name{font-weight:bold;color:#3c1b0b;margin-bottom:5px;}
+.coffee-address{font-size:0.9rem;color:#666;}
+
+/* Карта */
+#map{flex:1;height:100%;}
+
+/* Балун */
+.balloon-scroll{max-height:80vh;overflow-y:auto;}
+.balloon-content{padding:15px;}
+.balloon-header{font-size:1.2rem;font-weight:bold;margin-bottom:10px;color:#3c1b0b;}
+.balloon-address{color:#666;margin-bottom:10px;font-size:0.9rem;}
+.balloon-description{margin-bottom:15px;line-height:1.4;}
+.balloon-rating{margin-bottom:10px;color:#ff9800;}
+.balloon-footer{display:flex;justify-content:flex-end;gap:10px;margin-top:15px;}
+.balloon-btn{background-color:#f2e4dc;color:#3c1b0b;border:none;padding:8px 15px;border-radius:4px;cursor:pointer;}
+.telegram-embed{width:100%;height:300px;border:none;}
+
+/* Кнопка определения локации */
+.user-location-btn{position:absolute;right:20px;bottom:30px;background-color:white;border:none;border-radius:50%;width:40px;height:40px;box-shadow:0 1px 5px rgba(0,0,0,0.3);cursor:pointer;z-index:1000;display:flex;justify-content:center;align-items:center;}
+
+/* Кнопка показа sidebar */
+.show-sidebar-btn{background-color:#3c1b0b;color:white;border:none;padding:10px 15px;border-radius:4px;cursor:pointer;margin-right:10px;}
+
+/* Overlay для затемнения карты при открытом sidebar или балуне */
+.overlay{
+  position:fixed;
+  top:100px;
+  left:0;
+  width:100%;
+  height:calc(100% - 100px);
+  background: rgba(0,0,0,0.3);
+  z-index:998;
+  display:none;
 }
 
-// Добавляем кофейни на карту
+/* Адаптив */
+@media(max-width:768px){
+  .main-content{flex-direction:column;}
+  .sidebar{width:80%;height:calc(100vh - 100px);}
+  .header{flex-direction:column;gap:10px;}
+  .search-container{max-width:100%;}
+  .filter-container{overflow-x:auto;flex-wrap:nowrap;}
+}
+</style>
+</head>
+<body>
+
+<!-- Header -->
+<div class="header">
+  <h1 style="display:flex; align-items:center; gap:10px;">
+    <img src="https://github.com/maksdecept97-crypto/coffeemap/blob/main/logo1.png?raw=true" 
+         alt="Логотип" 
+         style="height:75px; width:auto; display:block;"
+         loading="lazy">
+    Где найти своё Тепло
+  </h1>
+  <div class="search-container">
+    <input type="text" class="search-box" placeholder="Поиск кофеен...">
+  </div>
+</div>
+
+<!-- Фильтры -->
+<div class="filter-container">
+  <!-- Кнопка списка кофеен -->
+  <button class="show-sidebar-btn">Список кофеен</button>
+  <button class="filter-btn active" data-filter="all">Все</button>
+  <button class="filter-btn" data-filter="center">В центре</button>
+  <button class="filter-btn" data-filter="with-food">С едой</button>
+  <select id="metro-filter">
+    <option value="">Метро (выберите)</option>
+    <option value="59.935497, 30.327139">Невский проспект</option>
+    <option value="59.927636, 30.347917">Владимирская</option>
+    <option value="59.956157, 30.318796">Горьковская</option>
+    <option value="59.944542, 30.359965">Чернышевская</option>
+    <option value="59.916351, 30.318347">Технологический институт</option>
+    <option value="59.907422, 30.299664">Балтийская</option>
+    <option value="59.966444, 30.311421">Петроградская</option>
+    <option value="59.931779, 30.360737">Пл.Восстания</option>
+    <option value="59.942520, 30.278278">Василеостровская</option>
+    <option value="59.926912, 30.318882">Сенная/Садовая/Спасская</option>
+    <option value="59.935962, 30.314754">Адмиралтейская</option>
+    <option value="59.931233, 30.354801">Маяковская</option>
+  </select>
+</div>
+
+<!-- Основной контент -->
+<div class="main-content">
+  <div class="sidebar"><ul class="coffee-list"></ul></div>
+  <div id="map"></div>
+</div>
+
+<!-- Кнопка геолокации -->
+<button class="user-location-btn" title="Мое местоположение"><i class="fas fa-location-arrow"></i></button>
+
+<!-- Overlay -->
+<div class="overlay"></div>
+
+<script>
+ymaps.ready(init);
+let map, coffeePlaces=[], userMarker=null, metroCircle=null, userCoords=null;
+
+// Данные кофеен
+const coffeeData = [
+  {id:1,name:"Tour Coffee",coordinates:[59.911946,30.316499],address:"7-я Красноармейская ул., 5Д",description:"Tour coffee — это предвкушение каждый раз чего-то нового: разные сорта, разные обжарщики. Здесь подают гриль-чизы и свежие десерты. И конечно кофе.",telegramEmbed:"https://t.me/teplo_coffeeroutes/4?embed=1",tags:["center","with-food"]},
+  {id:2,name:"UNIC",coordinates:[59.960012,30.311556],address:"ул. Кронверская, 12",description:"UNIC — место, куда хочется приходить за едой и кофе.",telegramEmbed:"https://t.me/teplo_coffeeroutes/8?embed=1",tags:["center","with-food"]},
+  {id:3,name:"Verlé",coordinates:[59.963493, 30.314817],address:"Каменноостровский пр-т, 25/2",description:"Уютное место с отличным кофе и атмосферой.",telegramEmbed:"https://t.me/teplo_coffeeroutes/15?embed=1",tags:["center"]},
+  {id:4,name:"Щегол",coordinates:[59.941899, 30.363427],address:"ул. Радищева, 38/20",description:"Уютная кофейня с тёплым, домашним дизайном, куда хочется заходить в любое время года.",telegramEmbed:"https://t.me/teplo_coffeeroutes/22?embed=1",tags:["center","with-food"]},
+  {id:5,name:"Bolshecoffee roasters",coordinates:[59.927991, 30.353581],address:"ул. Марата, 22-2",description:"Bolshecoffee Roasters — это место, где вы можете насладиться ароматным кофе и вкусными десертами. Здесь вы найдете широкий выбор кофейных зерен.",telegramEmbed:"",tags:["center","with-food"]},
+  {id:6,name:"Сибаристика",coordinates:[59.910412, 30.284159],address:"наб. Обводного канала, 199-201К",description:"Sibaristica — это часть большого пространства, в которое входят коворкинг и школа бариста. В меню вошли почти два десятка видов кофе от классических черных до авторских — латте ройбуш, раф соленый арахис, флэт уайт, бариста-сет из трех напитков.",telegramEmbed:"https://t.me/teplo_coffeeroutes/35",tags:["with-food"]},
+  {id:7,name:"Щегол",coordinates:[59.912521, 30.317260],address:"6-я Красноармейская ул., 1",description:"Приятная кофейня с вкусным меню и прекрасным кофе.Просторные стеклянные двери, которые распахиваются в хорошую погоду, полка во всю стену с модными журналами, аккуратные столики и стильные лампы, гармонично вписывающиеся в интерьер.",telegramEmbed:"https://t.me/teplo_coffeeroutes/22?embed=1",tags:["with-food"]}
+];
+
+// Инициализация карты
+function init(){
+  map = new ymaps.Map("map",{center:[59.93,30.34], zoom:12, controls:['zoomControl','geolocationControl']});
+  addCoffeePlaces();
+  renderCoffeeList();
+  initEventHandlers();
+  locateUser();
+}
+
+// Добавление кофеен на карту
 function addCoffeePlaces(){
   coffeeData.forEach(coffee => {
     const balloonContentBody = `
@@ -43,28 +190,21 @@ function addCoffeePlaces(){
       iconImageHref:'https://github.com/maksdecept97-crypto/coffeemap/blob/main/point.png?raw=true',
       iconImageSize:[18,28],
       iconImageOffset:[-20,-40],
-      balloonMaxWidth:300, // ограничение ширины балуна
-      balloonMinWidth:250,
-      balloonCloseButton:true
+      balloonPanelMaxMapArea:0 // Чтобы балун на мобильных не съезжал
     });
 
     coffeePlaces.push({id: coffee.id, placemark, data: coffee});
     map.geoObjects.add(placemark);
 
-    // Клик по метке открывает балун и выделяет элемент списка
-    placemark.events.add('click', () => {
-      highlightCoffeeItem(coffee.id);
-      showOverlay(); // Появление затемнения при открытии балуна
+    // Клик по маркеру выделяет элемент списка
+    placemark.events.add('click', () => { 
+      highlightCoffeeItem(coffee.id); 
+      showOverlay(); // показать overlay при открытии балуна
     });
-
-    // При открытии балуна, показываем overlay
-    placemark.events.add('balloonopen', () => { showOverlay(); });
-    // При закрытии балуна, скрываем overlay
-    placemark.events.add('balloonclose', () => { hideOverlay(); });
   });
 }
 
-// Отрисовка списка кофеен в sidebar
+// Рендер списка кофеен
 function renderCoffeeList(){
   const list=document.querySelector('.coffee-list');
   list.innerHTML='';
@@ -78,54 +218,69 @@ function renderCoffeeList(){
         map.setCenter(cp.placemark.geometry.getCoordinates(),16);
         cp.placemark.balloon.open();
         highlightCoffeeItem(coffee.id);
+        showOverlay();
       }
     });
     list.appendChild(li);
   });
 }
 
-// Выделение выбранной кофейни в списке
+// Подсветка выбранной кофейни в списке
 function highlightCoffeeItem(id){
   document.querySelectorAll('.coffee-item').forEach(i=>i.classList.remove('active'));
   const selected=document.querySelector(`.coffee-item[data-id="${id}"]`);
   if(selected){selected.classList.add('active'); selected.scrollIntoView({behavior:'smooth',block:'nearest'});}
 }
 
-// Обработчики кнопок и фильтров
+// Инициализация обработчиков
 function initEventHandlers(){
   document.querySelector('.search-box').addEventListener('input',applyFilters);
-
-  document.querySelectorAll('.filter-btn').forEach(btn=>{
-    btn.addEventListener('click',function(){
-      document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));
-      this.classList.add('active');
-      applyFilters();
-    });
-  });
-
+  document.querySelectorAll('.filter-btn').forEach(btn=>btn.addEventListener('click',function(){
+    document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active')); this.classList.add('active');
+    applyFilters();
+  }));
   document.getElementById('metro-filter').addEventListener('change',applyFilters);
   document.querySelector('.user-location-btn').addEventListener('click',locateUser);
 
-  // Кнопка показа/скрытия панели кофеен
+  // Кнопка показа/скрытия панели
   document.querySelector('.show-sidebar-btn').addEventListener('click',()=>{
     const sidebar=document.querySelector('.sidebar');
     sidebar.classList.toggle('show');
-    if(sidebar.classList.contains('show')){
-      showOverlay();
-    } else {
-      hideOverlay();
-    }
+    if(sidebar.classList.contains('show')) showOverlay();
+    else hideOverlay();
   });
 
-  // Клик по overlay закрывает sidebar и все балуны
+  // Клик по overlay закрывает sidebar и балун
   document.querySelector('.overlay').addEventListener('click',()=>{
-    document.querySelector('.sidebar').classList.remove('show');
-    coffeePlaces.forEach(cp => cp.placemark.balloon.close());
     hideOverlay();
+    closeAllBalloons();
+    document.querySelector('.sidebar').classList.remove('show');
+  });
+
+  // Клик по карте закрывает балун
+  map.events.add('click',()=>{
+    closeAllBalloons();
+    hideOverlay();
+    document.querySelector('.sidebar').classList.remove('show');
   });
 }
 
-// Применение фильтров
+// Показ overlay
+function showOverlay(){
+  document.querySelector('.overlay').style.display='block';
+}
+
+// Скрыть overlay
+function hideOverlay(){
+  document.querySelector('.overlay').style.display='none';
+}
+
+// Закрыть все балуны
+function closeAllBalloons(){
+  coffeePlaces.forEach(cp=>cp.placemark.balloon.close());
+}
+
+// Фильтры
 function applyFilters(){
   const searchText=document.querySelector('.search-box').value.toLowerCase();
   const activeFilter=document.querySelector('.filter-btn.active').dataset.filter;
@@ -142,8 +297,8 @@ function applyFilters(){
 
   coffeePlaces.forEach(cp=>{
     const name=cp.data.name.toLowerCase(), addr=cp.data.address.toLowerCase();
-    let visible=true;
-    if(searchText && !name.includes(searchText) && !addr.includes(searchText)) visible=false;
+    let visible=true
+        if(searchText && !name.includes(searchText) && !addr.includes(searchText)) visible=false;
     if(activeFilter!=='all' && !cp.data.tags.includes(activeFilter)) visible=false;
     if(metroCoords){
       const dist=ymaps.coordSystem.geo.getDistance(cp.data.coordinates,metroCoords);
@@ -156,7 +311,7 @@ function applyFilters(){
   });
 }
 
-// Определение местоположения пользователя
+// Геолокация пользователя
 function locateUser(){
   if(!navigator.geolocation){alert("Геолокация не поддерживается вашим браузером."); return;}
   navigator.geolocation.getCurrentPosition(pos=>{
@@ -169,10 +324,11 @@ function locateUser(){
 function addUserMarker(coords){
   if(userMarker){map.geoObjects.remove(userMarker);}
   userMarker=new ymaps.Placemark(coords,{balloonContent:'Вы здесь'},{preset:'islands#circleIcon',iconColor:'#3399ff'});
-  map.geoObjects.add(userMarker); map.setCenter(coords,14,{duration:500});
+  map.geoObjects.add(userMarker); 
+  map.setCenter(coords,14,{duration:500});
 }
 
-// Открываем маршрут в новой вкладке через Яндекс.Карты
+// Открытие маршрута через Яндекс.Карты
 function openRoute(lat, lon){
   if(!userCoords){
     alert("Сначала определите ваше местоположение!");
@@ -181,12 +337,6 @@ function openRoute(lat, lon){
   const url = `https://yandex.ru/maps/?rtext=${userCoords[0]},${userCoords[1]}~${lat},${lon}&rtt=auto`;
   window.open(url,'_blank');
 }
-
-// Показ overlay
-function showOverlay(){ document.querySelector('.overlay').style.display='block'; }
-
-// Скрытие overlay
-function hideOverlay(){ document.querySelector('.overlay').style.display='none'; }
 </script>
 </body>
 </html>
