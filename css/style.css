@@ -1,69 +1,259 @@
-body, html {
-  margin: 0;
-  padding: 0;
-  height: 100%;
-  font-family: "Arial", sans-serif;
+/* ========== Базовые стили ========== */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: 'Times New Roman', Georgia, Verdana, sans-serif;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
 }
 
 .header {
-  background: #fff;
-  padding: 10px;
-  border-bottom: 1px solid #ccc;
+    background-color: #361909;
+    color: #f2e4dc;
+    padding: 15px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+}
+
+.header h1 {
+    font-size: 1.5rem;
 }
 
 .search-container {
-  display: flex;
-  gap: 10px;
-  margin-top: 10px;
-  flex-wrap: wrap;
+    position: relative;
+    width: 100%;
+    max-width: 400px;
 }
 
-#map {
-  width: 100%;
-  height: calc(100% - 120px);
+.search-box {
+    width: 100%;
+    padding: 10px 15px;
+    border: none;
+    border-radius: 20px;
+    font-size: 1rem;
 }
 
-/* выезжающий список */
+.filter-container {
+    background-color: #f5f5f5;
+    padding: 10px 20px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    border-bottom: 1px solid #ddd;
+    align-items: center;
+}
+
+.show-sidebar-btn {
+    background-color: #3c1b0b;
+    color: white;
+    border: none;
+    padding: 8px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.filter-btn {
+    background-color: white;
+    border: 1px solid #ddd;
+    border-radius: 20px;
+    padding: 5px 15px;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.filter-btn:hover, .filter-btn.active {
+    background-color: #3c1b0b;
+    color: white;
+}
+
+#metro-filter {
+    padding: 5px 10px;
+    border-radius: 300px;
+    border: 1px solid #ccc;
+}
+
+.main-content {
+    display: flex;
+    flex: 1;
+    height: calc(100vh - 100px);
+}
+
+/* ========== Сайдбар ========== */
+.sidebar {
+    width: 300px;
+    background-color: white;
+    border-right: 1px solid #ddd;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    transition: transform 0.28s ease;
+    position: fixed;
+    left: 0;
+    bottom: 0;
+    z-index: 999;
+    transform: translateX(-100%);
+}
+
+.sidebar.show {
+    transform: translateX(0);
+}
+
+.sidebar-overlay {
+    position: fixed;
+    left: 0;
+    width: 100%;
+    background: rgba(0,0,0,0.3);
+    z-index: 998;
+    display: none;
+}
+
 .coffee-list {
-  position: absolute;
-  top: 110px; /* сразу под фильтрами */
-  left: -300px;
-  width: 300px;
-  max-height: calc(100% - 110px);
-  background: #fff;
-  border-right: 1px solid #ccc;
-  overflow-y: auto;
-  transition: left 0.3s ease;
-  z-index: 1000;
+    list-style: none;
+    padding: 0;
+    margin: 0;
 }
 
-.coffee-list.active {
-  left: 0;
+.coffee-item {
+    padding: 15px;
+    border-bottom: 1px solid #eee;
+    cursor: pointer;
+    transition: 0.2s;
 }
 
-.coffee-list ul {
-  list-style: none;
-  padding: 0;
-  margin: 0;
+.coffee-item:hover {
+    background-color: #f9f9f9;
 }
 
-.coffee-list li {
-  padding: 10px;
-  border-bottom: 1px solid #eee;
-  cursor: pointer;
+.coffee-item.active {
+    background-color: #f0e6d8;
 }
 
-.coffee-list li:hover {
-  background: #f0f0f0;
+.coffee-name {
+    font-weight: bold;
+    color: #3c1b0b;
+    margin-bottom: 5px;
 }
 
-/* балуны */
-.ymaps-2-1-79-balloon {
-  border-radius: 12px !important;
+.coffee-address {
+    font-size: 0.9rem;
+    color: #666;
 }
 
-.ymaps-2-1-79-balloon__content {
-  max-width: 260px !important;
-  overflow: hidden !important;
-  text-overflow: ellipsis;
+.coffee-rating {
+    color: #ff9800;
+    margin-top: 5px;
+}
+
+/* Карта */
+#map {
+    flex: 1;
+    height: 100%;
+}
+
+/* Балун */
+.balloon-scroll {
+    max-height: 70vh;
+    overflow-y: auto;
+}
+
+.balloon-content {
+    padding: 15px;
+}
+
+.balloon-header {
+    font-size: 1.1rem;
+    font-weight: bold;
+    margin-bottom: 8px;
+    color: #3c1b0b;
+    word-wrap: break-word;
+}
+
+.balloon-address {
+    color: #666;
+    margin-bottom: 8px;
+    font-size: 0.9rem;
+}
+
+.balloon-description {
+    margin-bottom: 12px;
+    line-height: 1.4;
+}
+
+.balloon-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 10px;
+}
+
+.balloon-btn {
+    background-color: #f2e4dc;
+    color: #3c1b0b;
+    border: none;
+    padding: 8px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.telegram-embed {
+    width: 100%;
+    height: 280px;
+    border: none;
+}
+
+/* Кнопка геолокации */
+.user-location-btn {
+    position: absolute;
+    right: 20px;
+    bottom: 30px;
+    background-color: white;
+    border: none;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    box-shadow: 0 1px 5px rgba(0,0,0,0.3);
+    cursor: pointer;
+    z-index: 1000;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+/* Мобильная адаптация */
+@media (max-width: 768px) {
+    .main-content {
+        flex-direction: column;
+    }
+    
+    .sidebar {
+        width: 80%;
+    }
+    
+    .header {
+        flex-direction: column;
+        gap: 10px;
+    }
+    
+    .search-container {
+        max-width: 100%;
+    }
+    
+    .filter-container {
+        overflow-x: auto;
+        flex-wrap: nowrap;
+    }
+    
+    .balloon-scroll {
+        max-height: 72vh;
+    }
 }
