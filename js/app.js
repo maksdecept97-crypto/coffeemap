@@ -1,53 +1,44 @@
-/* ========== Инициализация приложения ========== */
-ymaps.ready(init);
+ymaps.ready(() => {
+  initMap();
+  populateList();
 
-function init(){
-  map = new ymaps.Map("map", { center:[59.93,30.34], zoom:12, controls:['zoomControl','geolocationControl'] });
+  document.getElementById("toggleList").addEventListener("click", toggleList);
 
-  addCoffeePlaces();      // добавить метки
-  renderCoffeeList();     // сформировать список в сайдбаре
-  initEventHandlers();    // зарегистрировать обработчики
-  locateUser();           // попытаться определить пользователя
-
-  // корректируем позицию сайдбара под фильтрами (динамически)
-  adjustSidebarPosition();
-  window.addEventListener('load', adjustSidebarPosition);
-  window.addEventListener('resize', adjustSidebarPosition);
-
-  // клик по карте: закрываем все балуны и скрываем сайдбар
-  map.events.add('click', ()=>{ closeAllBalloons(); window.hideSidebar(); });
-}
-
-/* ========== Обработчики событий ========== */
-function initEventHandlers(){
-  // Поиск
-  document.querySelector('.search-box').addEventListener('input', applyFilters);
-
-  // Фильтры по кнопкам
-  document.querySelectorAll('.filter-btn').forEach(btn=>{
-    btn.addEventListener('click', function(){
-      document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));
-      this.classList.add('active');
-      applyFilters();
+  // фильтрация по метро
+  document.getElementById("metroFilter").addEventListener("change", e => {
+    const metro = e.target.value;
+    placemarks.forEach(({ placemark, data }) => {
+      if (!metro || data.metro === metro) {
+        placemark.options.set("visible", true);
+      } else {
+        placemark.options.set("visible", false);
+      }
     });
   });
 
-  // metro select
-  document.getElementById('metro-filter').addEventListener('change', applyFilters);
-
-  // кнопка геолокации
-  document.querySelector('.user-location-btn').addEventListener('click', locateUser);
-
-  // кнопка показа/скрытия сайдбара (в филтерной строке)
-  document.querySelector('.show-sidebar-btn').addEventListener('click', ()=>{
-    const sidebar = document.querySelector('.sidebar');
-    const overlay = document.querySelector('.sidebar-overlay');
-    sidebar.classList.toggle('show');
-    // выставляем позицию перед показом (на случай смены размера)
-    adjustSidebarPosition();
-    overlay.style.display = sidebar.classList.contains('show') ? 'block' : 'none';
+  // фильтрация по радиусу
+  document.getElementById("radiusFilter").addEventListener("change", e => {
+    const radius = parseInt(e.target.value);
+    if (metroCircle) {
+      map.geoObjects.remove(metroCircle);
+      metroCircle = null;
+    }
+    if (radius > 0 && userLocation) {
+      metroCircle = new ymaps.Circle([userLocation, radius], {}, {
+        fillColor: "#DB709377",
+        strokeColor: "#990066",
+        strokeOpacity: 0.8,
+        strokeWidth: 2
+      });
+      map.geoObjects.add(metroCircle);
+    }
   });
 
-  // клик по overlay скрывает сайдбар
-  document.querySelector('.sidebar-overlay').addEventListener('click', window.hideSidebar);
-}
+  // поиск
+  document.getElementById("searchBox").addEventListener("input", e => {
+    const query = e.target.value.toLowerCase();
+    placemarks.forEach(({ placemark, data }) => {
+      placemark.options.set("visible", data.name.toLowerCase().includes(query));
+    });
+  });
+});
