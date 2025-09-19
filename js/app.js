@@ -1,44 +1,75 @@
-ymaps.ready(() => {
-  initMap();
-  populateList();
+/* ========== Инициализация приложения ========== */
+ymaps.ready(init);
 
-  document.getElementById("toggleList").addEventListener("click", toggleList);
+function init(){
+  // Создаем карту
+  map = new ymaps.Map("map", { 
+    center: [59.93, 30.34], 
+    zoom: 12, 
+    controls: ['zoomControl', 'geolocationControl'] 
+  });
 
-  // фильтрация по метро
-  document.getElementById("metroFilter").addEventListener("change", e => {
-    const metro = e.target.value;
-    placemarks.forEach(({ placemark, data }) => {
-      if (!metro || data.metro === metro) {
-        placemark.options.set("visible", true);
+  // Инициализируем приложение
+  addCoffeePlaces();
+  renderCoffeeList();
+  initEventHandlers();
+  
+  // Корректируем позицию сайдбара
+  adjustSidebarPosition();
+
+  // Клик по карте: закрываем все балуны и скрываем сайдбар
+  map.events.add('click', () => {
+    closeAllBalloons();
+    window.hideSidebar();
+  });
+}
+
+/* ========== Обработчики событий ========== */
+function initEventHandlers(){
+  // Поиск
+  const searchBox = document.querySelector('.search-box');
+  if (searchBox) {
+    searchBox.addEventListener('input', applyFilters);
+  }
+
+  // Фильтры по кнопкам
+  const filterButtons = document.querySelectorAll('.filter-btn');
+  filterButtons.forEach(btn => {
+    btn.addEventListener('click', function() {
+      filterButtons.forEach(b => b.classList.remove('active'));
+      this.classList.add('active');
+      applyFilters();
+    });
+  });
+
+  // Фильтр по метро
+  const metroFilter = document.getElementById('metro-filter');
+  if (metroFilter) {
+    metroFilter.addEventListener('change', applyFilters);
+  }
+
+  // Кнопка геолокации
+  const locationBtn = document.querySelector('.user-location-btn');
+  if (locationBtn) {
+    locationBtn.addEventListener('click', locateUser);
+  }
+
+  // Кнопка показа/скрытия сайдбара
+  const sidebarBtn = document.querySelector('.show-sidebar-btn');
+  if (sidebarBtn) {
+    sidebarBtn.addEventListener('click', () => {
+      const sidebar = document.querySelector('.sidebar');
+      if (sidebar.classList.contains('show')) {
+        window.hideSidebar();
       } else {
-        placemark.options.set("visible", false);
+        window.showSidebar();
       }
     });
-  });
+  }
 
-  // фильтрация по радиусу
-  document.getElementById("radiusFilter").addEventListener("change", e => {
-    const radius = parseInt(e.target.value);
-    if (metroCircle) {
-      map.geoObjects.remove(metroCircle);
-      metroCircle = null;
-    }
-    if (radius > 0 && userLocation) {
-      metroCircle = new ymaps.Circle([userLocation, radius], {}, {
-        fillColor: "#DB709377",
-        strokeColor: "#990066",
-        strokeOpacity: 0.8,
-        strokeWidth: 2
-      });
-      map.geoObjects.add(metroCircle);
-    }
-  });
-
-  // поиск
-  document.getElementById("searchBox").addEventListener("input", e => {
-    const query = e.target.value.toLowerCase();
-    placemarks.forEach(({ placemark, data }) => {
-      placemark.options.set("visible", data.name.toLowerCase().includes(query));
-    });
-  });
-});
+  // Клик по overlay скрывает сайдбар
+  const overlay = document.querySelector('.sidebar-overlay');
+  if (overlay) {
+    overlay.addEventListener('click', window.hideSidebar);
+  }
+}
