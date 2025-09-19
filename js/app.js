@@ -15,7 +15,7 @@ function init(){
   window.addEventListener('resize', adjustSidebarPosition);
 
   // клик по карте: закрываем все балуны и скрываем сайдбар
-  map.events.add('click', ()=>{ closeAllBalloons(); hideSidebar(); });
+  map.events.add('click', ()=>{ closeAllBalloons(); window.hideSidebar(); });
 }
 
 /* ========== Обработчики событий ========== */
@@ -49,10 +49,5 @@ function initEventHandlers(){
   });
 
   // клик по overlay скрывает сайдбар
-  document.querySelector('.sidebar-overlay').addEventListener('click', hideSidebar);
+  document.querySelector('.sidebar-overlay').addEventListener('click', window.hideSidebar);
 }
-
-/* Пересчитываем позицию при загрузке/resize/rotate */
-window.addEventListener('load', adjustSidebarPosition);
-window.addEventListener('resize', adjustSidebarPosition);
-window.addEventListener('orientationchange', ()=>{ setTimeout(adjustSidebarPosition,300); });
