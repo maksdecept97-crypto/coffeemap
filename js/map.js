@@ -57,7 +57,7 @@ function addCoffeePlaces(){
       coffee.coordinates, 
       {
         balloonContentHeader: coffee.name,
-        balloonContentBody: balloonContent.innerHTML
+        balloonContentBody: balloonContent.outerHTML
       }, 
       {
         iconLayout: 'default#image',
@@ -140,3 +140,4 @@ window.openRoute = function(lat, lon){
   const url = `https://yandex.ru/maps/?rtext=${userCoords[0]},${userCoords[1]}~${lat},${lon}&rtt=auto`;
   window.open(url, '_blank');
 };
+
