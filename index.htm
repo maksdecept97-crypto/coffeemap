@@ -14,34 +14,61 @@ body{font-family:'Times New Roman', Courier, Verdana,sans-serif;height:100vh;dis
 .search-container{position:relative;width:100%;max-width:400px;}
 .search-box{width:100%;padding:10px 15px;border:none;border-radius:20px;font-size:1rem;}
 .filter-container{background-color:#f5f5f5;padding:10px 20px;display:flex;flex-wrap:wrap;gap:10px;border-bottom:1px solid #ddd;align-items:center;}
-.show-sidebar-btn{background-color:#3c1b0b;color:white;border:none;padding:8px 15px;border-radius:4px;cursor:pointer;margin-right:10px;}
+																																		
 .filter-btn{background-color:white;border:1px solid #ddd;border-radius:20px;padding:5px 15px;cursor:pointer;transition:all 0.3s;}
 .filter-btn:hover,.filter-btn.active{background-color:#3c1b0b;color:white;}
 #metro-filter{padding:5px 10px;border-radius:300px;border:1px solid #ccc;}
 .main-content{display:flex;flex:1;height:calc(100vh - 100px);}
-.sidebar{width:300px;background-color:white;border-right:1px solid #ddd;overflow-y:auto;display:flex;flex-direction:column;transition: transform 0.3s ease; position:fixed; top:80px; bottom:0; left:0; z-index:999; transform: translateX(-100%);}
+
+/* Сайдбар — убрали фиксированный top */
+.sidebar{
+  width:300px;
+  background-color:white;
+  border-right:1px solid #ddd;
+  overflow-y:auto;
+  display:flex;
+  flex-direction:column;
+  transition: transform 0.3s ease;
+  position:fixed;
+  bottom:0;
+  left:0;
+  z-index:999;
+  transform: translateX(-100%);
+}
 .sidebar.show{transform: translateX(0);}
-.sidebar-overlay{position:fixed;top:80px;left:0;width:100%;height:calc(100vh - 80px);background:rgba(0,0,0,0.3);z-index:998;display:none;}
-.sidebar-overlay.show{display:block;}
+
+.sidebar-overlay {
+  position:fixed;
+  left:0;
+  width:100%;
+  background:rgba(0,0,0,0.3);
+  z-index:998;
+  display:none;
+}
+
 .coffee-list{list-style:none;padding:0;margin:0;}
 .coffee-item{padding:15px;border-bottom:1px solid #eee;cursor:pointer;transition:0.2s;}
 .coffee-item:hover{background-color:#f9f9f9;}
 .coffee-item.active{background-color:#f0e6d8;}
 .coffee-name{font-weight:bold;color:#3c1b0b;margin-bottom:5px;}
 .coffee-address{font-size:0.9rem;color:#666;}
+.coffee-rating{color:#ff9800;margin-top:5px;}
 #map{flex:1;height:100%;}
 .balloon-scroll{max-height:80vh;overflow-y:auto;}
 .balloon-content{padding:15px;}
-.balloon-header{font-size:1.2rem;font-weight:bold;margin-bottom:10px;color:#3c1b0b;word-wrap:break-word;}
+.balloon-header{font-size:1.2rem;font-weight:bold;margin-bottom:10px;color:#3c1b0b;}
 .balloon-address{color:#666;margin-bottom:10px;font-size:0.9rem;}
 .balloon-description{margin-bottom:15px;line-height:1.4;}
+.balloon-rating{margin-bottom:10px;color:#ff9800;}
 .balloon-footer{display:flex;justify-content:flex-end;gap:10px;margin-top:15px;}
 .balloon-btn{background-color:#f2e4dc;color:#3c1b0b;border:none;padding:8px 15px;border-radius:4px;cursor:pointer;}
 .telegram-embed{width:100%;height:300px;border:none;}
 .user-location-btn{position:absolute;right:20px;bottom:30px;background-color:white;border:none;border-radius:50%;width:40px;height:40px;box-shadow:0 1px 5px rgba(0,0,0,0.3);cursor:pointer;z-index:1000;display:flex;justify-content:center;align-items:center;}
+.show-sidebar-btn{background-color:#3c1b0b;color:white;border:none;padding:8px 15px;border-radius:4px;cursor:pointer;}
+
 @media(max-width:768px){
   .main-content{flex-direction:column;}
-  .sidebar{width:80%;height:calc(100vh - 80px);}
+  .sidebar{width:80%;}
   .header{flex-direction:column;gap:10px;}
   .search-container{max-width:100%;}
   .filter-container{overflow-x:auto;flex-wrap:nowrap;}
@@ -64,7 +91,7 @@ body{font-family:'Times New Roman', Courier, Verdana,sans-serif;height:100vh;dis
 </div>
 
 <div class="filter-container">
-  <!-- Кнопка показа списка кофеен -->
+															  
   <button class="show-sidebar-btn">Список кофеен</button>
   <button class="filter-btn active" data-filter="all">Все</button>
   <button class="filter-btn" data-filter="center">В центре</button>
@@ -108,7 +135,7 @@ const coffeeData = [
   {id:7,name:"Щегол",coordinates:[59.912521, 30.317260],address:"6-я Красноармейская ул., 1",description:"Приятная кофейня с вкусным меню и прекрасным кофе.Просторные стеклянные двери, которые распахиваются в хорошую погоду, полка во всю стену с модными журналами, аккуратные столики и стильные лампы, гармонично вписывающиеся в интерьер.",telegramEmbed:"https://t.me/teplo_coffeeroutes/22?embed=1",tags:["with-food"]}
 ];
 
-// Инициализация карты
+										
 function init(){
   map = new ymaps.Map("map",{center:[59.93,30.34], zoom:12, controls:['zoomControl','geolocationControl']});
 
@@ -116,14 +143,14 @@ function init(){
   renderCoffeeList();
   initEventHandlers();
   locateUser();
-
-  // Закрываем балун при клике на карту вне его
-  map.events.add('click', () => {
-    coffeePlaces.forEach(cp => cp.placemark.balloon.close());
-  });
+  adjustSidebarPosition(); // устанавливаем позицию списка при старте
+																				  
+								 
+															 
+	 
 }
 
-// Добавление кофейных точек на карту
+																   
 function addCoffeePlaces(){
   coffeeData.forEach(coffee => {
     const balloonContentBody = `
@@ -146,20 +173,20 @@ function addCoffeePlaces(){
       iconLayout:'default#image',
       iconImageHref:'https://github.com/maksdecept97-crypto/coffeemap/blob/main/point.png?raw=true',
       iconImageSize:[18,28],
-      iconImageOffset:[-9,-28], // сдвиг для корректного отображения балуна
-      balloonMaxWidth:300 // ограничение ширины для мобильной версии
+      iconImageOffset:[-20,-40]
+																									   
     });
 
     coffeePlaces.push({id: coffee.id, placemark, data: coffee});
     map.geoObjects.add(placemark);
 
-    placemark.events.add('click', () => { 
-      highlightCoffeeItem(coffee.id); 
-    });
+    placemark.events.add('click', () => { highlightCoffeeItem(coffee.id); });
+									  
+	   
   });
 }
 
-// Отображение списка кофеен в sidebar
+															  
 function renderCoffeeList(){
   const list=document.querySelector('.coffee-list');
   list.innerHTML='';
@@ -169,26 +196,26 @@ function renderCoffeeList(){
     li.innerHTML=`<div class="coffee-name">${coffee.name}</div><div class="coffee-address">${coffee.address}</div>`;
     li.addEventListener('click',()=>{
       const cp=coffeePlaces.find(c=>c.id===coffee.id);
-      if(cp){
-        map.setCenter(cp.placemark.geometry.getCoordinates(),16); 
-        cp.placemark.balloon.open(); 
-        highlightCoffeeItem(coffee.id);
-        // Закрываем sidebar после клика
-        hideSidebar();
-      }
+			 
+      if(cp){map.setCenter(cp.placemark.geometry.getCoordinates(),16); cp.placemark.balloon.open(); highlightCoffeeItem(coffee.id);}
+									 
+									   
+														   
+					  
+	   
     });
     list.appendChild(li);
   });
 }
 
-// Подсветка выбранной кофейни
+													   
 function highlightCoffeeItem(id){
   document.querySelectorAll('.coffee-item').forEach(i=>i.classList.remove('active'));
   const selected=document.querySelector(`.coffee-item[data-id="${id}"]`);
   if(selected){selected.classList.add('active'); selected.scrollIntoView({behavior:'smooth',block:'nearest'});}
 }
 
-// Инициализация обработчиков событий
+																	 
 function initEventHandlers(){
   document.querySelector('.search-box').addEventListener('input',applyFilters);
   document.querySelectorAll('.filter-btn').forEach(btn=>btn.addEventListener('click',function(){
@@ -198,26 +225,29 @@ function initEventHandlers(){
   document.getElementById('metro-filter').addEventListener('change',applyFilters);
   document.querySelector('.user-location-btn').addEventListener('click',locateUser);
 
-  // Кнопка показа/скрытия sidebar
-  const sidebar=document.querySelector('.sidebar');
-  const overlay=document.querySelector('.sidebar-overlay');
+  // кнопка списка
+												   
+														   
 
   document.querySelector('.show-sidebar-btn').addEventListener('click',()=>{
-    sidebar.classList.toggle('show');
-    overlay.classList.toggle('show');
+    document.querySelector('.sidebar').classList.toggle('show');
+    document.querySelector('.sidebar-overlay').style.display =
+      document.querySelector('.sidebar').classList.contains('show') ? 'block' : 'none';
   });
 
-  // Закрываем sidebar при клике на overlay
-  overlay.addEventListener('click',hideSidebar);
+  // клик по overlay — закрыть список
+  document.querySelector('.sidebar-overlay').addEventListener('click',()=>{
+    document.querySelector('.sidebar').classList.remove('show');
+    document.querySelector('.sidebar-overlay').style.display = 'none';
+  });
+
+  // клик по карте — закрывать все балуны
+  map.events.add('click',()=>{map.balloon.close();});
+															  
+																	  
 }
 
-// Функция скрытия sidebar
-function hideSidebar(){
-  document.querySelector('.sidebar').classList.remove('show');
-  document.querySelector('.sidebar-overlay').classList.remove('show');
-}
-
-// Применение фильтров к кофейням
+															
 function applyFilters(){
   const searchText=document.querySelector('.search-box').value.toLowerCase();
   const activeFilter=document.querySelector('.filter-btn.active').dataset.filter;
@@ -234,7 +264,7 @@ function applyFilters(){
 
   coffeePlaces.forEach(cp=>{
     const name=cp.data.name.toLowerCase(), addr=cp.data.address.toLowerCase();
-    let visible=true
+    let visible=true;
     if(searchText && !name.includes(searchText) && !addr.includes(searchText)) visible=false;
     if(activeFilter!=='all' && !cp.data.tags.includes(activeFilter)) visible=false;
     if(metroCoords){
@@ -248,7 +278,7 @@ function applyFilters(){
   });
 }
 
-// Определение геопозиции пользователя
+																	   
 function locateUser(){
   if(!navigator.geolocation){alert("Геолокация не поддерживается вашим браузером."); return;}
   navigator.geolocation.getCurrentPosition(pos=>{
@@ -257,15 +287,15 @@ function locateUser(){
   },err=>{console.error("Ошибка геолокации:",err); alert("Не удалось определить местоположение.");},{enableHighAccuracy:true,timeout:5000});
 }
 
-// Добавление маркера пользователя
+															   
 function addUserMarker(coords){
   if(userMarker){map.geoObjects.remove(userMarker);}
   userMarker=new ymaps.Placemark(coords,{balloonContent:'Вы здесь'},{preset:'islands#circleIcon',iconColor:'#3399ff'});
-  map.geoObjects.add(userMarker); 
-  map.setCenter(coords,14,{duration:500});
+								  
+  map.geoObjects.add(userMarker); map.setCenter(coords,14,{duration:500});
 }
 
-// Открываем маршрут через Яндекс.Карты
+// открываем маршрут в новой вкладке через Яндекс.Карты
 function openRoute(lat, lon){
   if(!userCoords){
     alert("Сначала определите ваше местоположение!");
@@ -274,6 +304,23 @@ function openRoute(lat, lon){
   const url = `https://yandex.ru/maps/?rtext=${userCoords[0]},${userCoords[1]}~${lat},${lon}&rtt=auto`;
   window.open(url,'_blank');
 }
+
+// функция для динамического позиционирования sidebar и overlay
+function adjustSidebarPosition(){
+  const headerHeight=document.querySelector('.header').offsetHeight;
+  const filterHeight=document.querySelector('.filter-container').offsetHeight;
+  const topOffset=headerHeight+filterHeight;
+
+  const sidebar=document.querySelector('.sidebar');
+  const overlay=document.querySelector('.sidebar-overlay');
+
+  sidebar.style.top=topOffset+"px";
+  sidebar.style.height="calc(100vh - "+topOffset+"px)";
+  overlay.style.top=topOffset+"px";
+  overlay.style.height="calc(100vh - "+topOffset+"px)";
+}
+
+window.addEventListener('resize',adjustSidebarPosition);
 </script>
 </body>
 </html>
