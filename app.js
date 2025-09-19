@@ -1,8 +1,6 @@
 ymaps.ready(init);
-
 let map, coffeePlaces=[], userMarker=null, metroCircle=null, userCoords=null;
 
-// Инициализация карты
 function init(){
   map = new ymaps.Map("map",{center:[59.93,30.34], zoom:12, controls:['zoomControl','geolocationControl']});
   addCoffeePlaces();
@@ -11,10 +9,12 @@ function init(){
   locateUser();
 
   // Закрытие балуна при клике на карту
-  map.events.add('click', () => { map.balloon.close(); });
+  map.events.add('click', function(){
+    coffeePlaces.forEach(cp=>cp.placemark.balloon.close());
+    document.querySelector('.sidebar').classList.remove('show');
+  });
 }
 
-// Добавление маркеров кофеен
 function addCoffeePlaces(){
   coffeeData.forEach(coffee => {
     const balloonContentBody = `
@@ -30,11 +30,15 @@ function addCoffeePlaces(){
         </div>
       </div>`;
 
-    const placemark = new ymaps.Placemark(coffee.coordinates, {balloonContentHeader: coffee.name, balloonContentBody}, {
+    const placemark = new ymaps.Placemark(coffee.coordinates, {
+      balloonContentHeader: coffee.name,
+      balloonContentBody: balloonContentBody
+    }, {
       iconLayout:'default#image',
-      iconImageHref:'images/point.png',
+      iconImageHref:'https://github.com/maksdecept97-crypto/coffeemap/blob/main/point.png?raw=true',
       iconImageSize:[18,28],
-      iconImageOffset:[-20,-40]
+      iconImageOffset:[-20,-40],
+      balloonShadow:false
     });
 
     coffeePlaces.push({id: coffee.id, placemark, data: coffee});
@@ -43,7 +47,6 @@ function addCoffeePlaces(){
   });
 }
 
-// Отображение списка кофеен
 function renderCoffeeList(){
   const list=document.querySelector('.coffee-list');
   list.innerHTML='';
@@ -59,14 +62,12 @@ function renderCoffeeList(){
   });
 }
 
-// Подсветка выбранной кофейни
 function highlightCoffeeItem(id){
   document.querySelectorAll('.coffee-item').forEach(i=>i.classList.remove('active'));
   const selected=document.querySelector(`.coffee-item[data-id="${id}"]`);
   if(selected){selected.classList.add('active'); selected.scrollIntoView({behavior:'smooth',block:'nearest'});}
 }
 
-// Обработчики событий
 function initEventHandlers(){
   document.querySelector('.search-box').addEventListener('input',applyFilters);
   document.querySelectorAll('.filter-btn').forEach(btn=>btn.addEventListener('click',function(){
@@ -82,7 +83,6 @@ function initEventHandlers(){
   });
 }
 
-// Фильтры поиска
 function applyFilters(){
   const searchText=document.querySelector('.search-box').value.toLowerCase();
   const activeFilter=document.querySelector('.filter-btn.active').dataset.filter;
@@ -113,7 +113,6 @@ function applyFilters(){
   });
 }
 
-// Определение геолокации пользователя
 function locateUser(){
   if(!navigator.geolocation){alert("Геолокация не поддерживается вашим браузером."); return;}
   navigator.geolocation.getCurrentPosition(pos=>{
@@ -128,12 +127,8 @@ function addUserMarker(coords){
   map.geoObjects.add(userMarker); map.setCenter(coords,14,{duration:500});
 }
 
-// Открываем маршрут в новой вкладке через Яндекс.Карты
 function openRoute(lat, lon){
-  if(!userCoords){
-    alert("Сначала определите ваше местоположение!");
-    return;
-  }
+  if(!userCoords){alert("Сначала определите ваше местоположение!"); return;}
   const url = `https://yandex.ru/maps/?rtext=${userCoords[0]},${userCoords[1]}~${lat},${lon}&rtt=auto`;
   window.open(url,'_blank');
 }
