@@ -15,7 +15,7 @@ function addCoffeePlaces(){
           <div class="balloon-description">${coffee.description}</div>
           ${coffee.telegramEmbed ? `<iframe class="telegram-embed" src="${coffee.telegramEmbed}"></iframe>` : ''}
           <div class="balloon-footer">
-            <button class="balloon-btn" onclick="openRoute(${coffee.coordinates[0]},${coffee.coordinates[1]})">Маршрут</button>
+            <button class="balloon-btn" onclick="window.openRoute(${coffee.coordinates[0]},${coffee.coordinates[1]})">Маршрут</button>
           </div>
         </div>
       </div>`;
@@ -39,7 +39,7 @@ function addCoffeePlaces(){
     map.geoObjects.add(placemark);
 
     // при клике на метку подсвечиваем элемент в списке (но не показываем overlay)
-    placemark.events.add('click', ()=>{ highlightCoffeeItem(coffee.id); });
+    placemark.events.add('click', ()=>{ window.highlightCoffeeItem(coffee.id); });
   });
 }
 
@@ -65,7 +65,7 @@ function closeAllBalloons(){
 }
 
 /* ========== Открыть маршрут в новой вкладке (внешний Яндекс.Карты) ========== */
-function openRoute(lat, lon){
+window.openRoute = function(lat, lon){
   if(!userCoords){ alert("Сначала определите ваше местоположение!"); return; }
   const url = `https://yandex.ru/maps/?rtext=${userCoords[0]},${userCoords[1]}~${lat},${lon}&rtt=auto`;
   window.open(url, '_blank');
