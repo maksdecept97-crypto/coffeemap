@@ -131,13 +131,55 @@ function closeAllBalloons(){
 }
 
 /* ========== Открыть маршрут в новой вкладке ========== */
-window.openRoute = function(lat, lon){
-  if (!userCoords) { 
-    alert("Сначала определите ваше местоположение!"); 
-    return; 
+// Если геолокация еще не определена, запрашиваем ее
+  if (!userCoords) {
+    if (!navigator.geolocation) { 
+      alert("Геолокация не поддерживается вашим браузером."); 
+      return; 
+    }
+    
+    // Запрашиваем геолокацию
+    navigator.geolocation.getCurrentPosition(
+      pos => {
+        userCoords = [pos.coords.latitude, pos.coords.longitude];
+        addUserMarker(userCoords);
+        
+        // После получения геолокации открываем маршрут
+        const url = `https://yandex.ru/maps/?rtext=${userCoords[0]},${userCoords[1]}~${lat},${lon}&rtt=auto`;
+        window.open(url, '_blank');
+      }, 
+      err => { 
+        console.error("Ошибка геолокации:", err); 
+        
+        // Если не удалось получить геолокацию, предлагаем ввести адрес вручную
+        const userAddress = prompt("Не удалось определить ваше местоположение. Введите ваш адрес или ориентир:");
+        if (userAddress) {
+          // Используем геокодирование для получения координат из адреса
+          ymaps.geocode(userAddress, { results: 1 }).then(function (res) {
+            const firstGeoObject = res.geoObjects.get(0);
+            if (firstGeoObject) {
+              const coords = firstGeoObject.geometry.getCoordinates();
+              const url = `https://yandex.ru/maps/?rtext=${coords[0]},${coords[1]}~${lat},${lon}&rtt=auto`;
+              window.open(url, '_blank');
+            } else {
+              alert("Не удалось найти указанный адрес. Пожалуйста, проверьте правильность ввода.");
+            }
+          }).catch(error => {
+            console.error("Ошибка геокодирования:", error);
+            alert("Произошла ошибка при определении адреса.");
+          });
+        }
+      }, 
+      { enableHighAccuracy: true, timeout: 10000, maximumAge: 60000 }
+    );
+  } else {
+    // Если геолокация уже определена, сразу открываем маршрут
+    const url = `https://yandex.ru/maps/?rtext=${userCoords[0]},${userCoords[1]}~${lat},${lon}&rtt=auto`;
+    window.open(url, '_blank');
   }
   
   const url = `https://yandex.ru/maps/?rtext=${userCoords[0]},${userCoords[1]}~${lat},${lon}&rtt=auto`;
   window.open(url, '_blank');
 };
+
 
