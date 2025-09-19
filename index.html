@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<title>Где найти своё Тепло</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="stylesheet" href="styles.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+
+<div class="header">
+  <h1 style="display:flex; align-items:center; gap:10px;">
+    <img src="images/logo1.png" alt="Логотип" style="height:75px; width:auto;" loading="lazy">
+    Где найти своё Тепло
+  </h1>
+  <div class="search-container">
+    <input type="text" class="search-box" placeholder="Поиск кофеен...">
+  </div>
+</div>
+
+<div class="filter-container">
+  <button class="show-sidebar-btn">Список кофеен</button>
+  <button class="filter-btn active" data-filter="all">Все</button>
+  <button class="filter-btn" data-filter="center">В центре</button>
+  <button class="filter-btn" data-filter="with-food">С едой</button>
+  <select id="metro-filter">
+    <option value="">Метро (выберите)</option>
+    <option value="59.935497, 30.327139">Невский проспект</option>
+    <option value="59.927636, 30.347917">Владимирская</option>
+    <option value="59.956157, 30.318796">Горьковская</option>
+    <option value="59.944542, 30.359965">Чернышевская</option>
+    <option value="59.916351, 30.318347">Технологический институт</option>
+    <option value="59.907422, 30.299664">Балтийская</option>
+    <option value="59.966444, 30.311421">Петроградская</option>
+    <option value="59.931779, 30.360737">Пл.Восстания</option>
+    <option value="59.942520, 30.278278">Василеостровская</option>
+    <option value="59.926912, 30.318882">Сенная/Садовая/Спасская</option>
+    <option value="59.935962, 30.314754">Адмиралтейская</option>
+    <option value="59.931233, 30.354801">Маяковская</option>
+  </select>
+</div>
+
+<div class="main-content">
+  <div class="sidebar"><ul class="coffee-list"></ul></div>
+  <div id="map"></div>
+</div>
+
+<button class="user-location-btn" title="Мое местоположение"><i class="fas fa-location-arrow"></i></button>
+
+<script src="https://api-maps.yandex.ru/2.1/?lang=ru_RU" type="text/javascript"></script>
+<script src="data.js"></script>
+<script src="app.js"></script>
+
+</body>
+</html>
