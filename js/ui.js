@@ -14,8 +14,8 @@ function renderCoffeeList(){
       if(cp){
         map.setCenter(cp.placemark.geometry.getCoordinates(), 16);
         cp.placemark.balloon.open();
-        highlightCoffeeItem(coffee.id);
-        hideSidebar(); // скрываем сайдбар после выбора
+        window.highlightCoffeeItem(coffee.id);
+        window.hideSidebar(); // скрываем сайдбар после выбора
       }
     });
     list.appendChild(li);
@@ -23,14 +23,14 @@ function renderCoffeeList(){
 }
 
 /* ========== Подсветка выбранной кофейни ========== */
-function highlightCoffeeItem(id){
+window.highlightCoffeeItem = function(id){
   document.querySelectorAll('.coffee-item').forEach(i=>i.classList.remove('active'));
   const selected = document.querySelector(`.coffee-item[data-id="${id}"]`);
   if(selected){ selected.classList.add('active'); selected.scrollIntoView({behavior:'smooth', block:'nearest'}); }
 }
 
 /* ========== Функции показа/скрытия сайдбара ========== */
-function hideSidebar(){
+window.hideSidebar = function(){
   document.querySelector('.sidebar').classList.remove('show');
   document.querySelector('.sidebar-overlay').style.display = 'none';
 }
@@ -87,3 +87,8 @@ function applyFilters(){
     if(li) li.style.display = visible ? 'block' : 'none';
   });
 }
+
+/* Пересчитываем позицию при загрузке/resize/rotate */
+window.addEventListener('load', adjustSidebarPosition);
+window.addEventListener('resize', adjustSidebarPosition);
+window.addEventListener('orientationchange', ()=>{ setTimeout(adjustSidebarPosition,300); });
