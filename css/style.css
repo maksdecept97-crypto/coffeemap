@@ -2,73 +2,68 @@ body, html {
   margin: 0;
   padding: 0;
   height: 100%;
+  font-family: "Arial", sans-serif;
+}
+
+.header {
+  background: #fff;
+  padding: 10px;
+  border-bottom: 1px solid #ccc;
+}
+
+.search-container {
+  display: flex;
+  gap: 10px;
+  margin-top: 10px;
+  flex-wrap: wrap;
 }
 
 #map {
   width: 100%;
-  height: calc(100% - 60px); /* минус высота шапки */
+  height: calc(100% - 120px);
 }
 
-.header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  height: 60px;
-  padding: 5px 10px;
+/* выезжающий список */
+.coffee-list {
+  position: absolute;
+  top: 110px; /* сразу под фильтрами */
+  left: -300px;
+  width: 300px;
+  max-height: calc(100% - 110px);
   background: #fff;
-  border-bottom: 1px solid #ddd;
-}
-
-.logo img {
-  height: 40px;
-}
-
-.filters {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-/* боковое меню */
-.sidebar {
-  position: fixed;
-  top: 60px; /* начинается под шапкой */
-  left: 0;
-  width: 250px;
-  height: calc(100% - 60px);
-  background: #fff;
-  transform: translateX(-100%);
-  transition: transform 0.3s ease;
+  border-right: 1px solid #ccc;
+  overflow-y: auto;
+  transition: left 0.3s ease;
   z-index: 1000;
+}
+
+.coffee-list.active {
+  left: 0;
+}
+
+.coffee-list ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.coffee-list li {
   padding: 10px;
-  box-shadow: 2px 0 5px rgba(0,0,0,0.2);
-}
-
-.sidebar.active {
-  transform: translateX(0);
-}
-
-.sidebar .close-sidebar {
-  background: none;
-  border: none;
-  font-size: 20px;
+  border-bottom: 1px solid #eee;
   cursor: pointer;
 }
 
-.sidebar-overlay {
-  position: fixed;
-  top: 60px; /* тоже под шапкой */
-  left: 0;
-  width: 100%;
-  height: calc(100% - 60px);
-  background: rgba(0,0,0,0.3);
-  opacity: 0;
-  visibility: hidden;
-  transition: 0.3s;
-  z-index: 999;
+.coffee-list li:hover {
+  background: #f0f0f0;
 }
 
-.sidebar-overlay.active {
-  opacity: 1;
-  visibility: visible;
+/* балуны */
+.ymaps-2-1-79-balloon {
+  border-radius: 12px !important;
+}
+
+.ymaps-2-1-79-balloon__content {
+  max-width: 260px !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis;
 }
