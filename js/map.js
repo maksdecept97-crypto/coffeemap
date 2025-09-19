@@ -54,11 +54,11 @@ function addCoffeePlaces(){
     
     // Создаем метку
     const placemark = new ymaps.Placemark(
-      coffee.coordinates, 
+       coffee.coordinates,
       {
-        balloonContentHeader: coffee.name,
-        balloonContentBody: balloonContent.outerHTML
-      }, 
+        balloonContentHeader: coffee.name
+													
+      },
       {
         iconLayout: 'default#image',
         iconImageHref: 'https://github.com/maksdecept97-crypto/coffeemap/blob/main/point.png?raw=true',
@@ -66,12 +66,33 @@ function addCoffeePlaces(){
         iconImageOffset: [-9, -28],
         balloonMaxWidth: 350,
         balloonOffset: [0, -32],
-        balloonPanelMaxMapArea: 0
+        balloonPanelMaxMapArea: 0,
+        balloonContentLayout: ymaps.templateLayoutFactory.createClass(`
+          <div class="balloon-scroll">
+            <div class="balloon-content">
+              <div class="balloon-header">${coffee.name}</div>
+              <div class="balloon-address">${coffee.address}</div>
+              <div class="balloon-description">${coffee.description}</div>
+              ${coffee.telegramEmbed ? `<iframe class="telegram-embed" src="${coffee.telegramEmbed}" frameborder="0"></iframe>` : ''}
+              <div class="balloon-footer">
+                <button class="balloon-btn" id="route-btn-${coffee.id}">Маршрут</button>
+              </div>
+            </div>
+          </div>
+        `)
       }
     );
 
     coffeePlaces.push({ id: coffee.id, placemark, data: coffee });
     map.geoObjects.add(placemark);
+
+    // Привязка обработчика кнопки маршрута при открытии балуна
+    placemark.events.add('balloonopen', () => {
+      const btn = document.getElementById(`route-btn-${coffee.id}`);
+      if (btn) {
+        btn.onclick = () => window.openRoute(coffee.coordinates[0], coffee.coordinates[1]);
+      }
+    });
 
     // При клике на метку подсвечиваем элемент в списке
     placemark.events.add('click', () => {
@@ -178,6 +199,7 @@ function closeAllBalloons(){
     window.open(url, '_blank');
   }
 };
+
 
 
 
