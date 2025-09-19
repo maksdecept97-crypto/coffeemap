@@ -177,9 +177,7 @@ function closeAllBalloons(){
     const url = `https://yandex.ru/maps/?rtext=${userCoords[0]},${userCoords[1]}~${lat},${lon}&rtt=auto`;
     window.open(url, '_blank');
   }
-  
-  const url = `https://yandex.ru/maps/?rtext=${userCoords[0]},${userCoords[1]}~${lat},${lon}&rtt=auto`;
-  window.open(url, '_blank');
 };
+
 
 
