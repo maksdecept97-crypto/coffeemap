@@ -164,8 +164,8 @@ body {
 .balloon-scroll {
     max-height: 70vh;
     overflow-y: auto;
-    border-radius: 20px;
-    box-shadow: 0 8px 40px rgba(0,0,0,0.25);
+    border-radius: 50px;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.25);
     
 }
 
@@ -260,5 +260,6 @@ body {
         max-height: 72vh;
     }
 }
+
 
 
