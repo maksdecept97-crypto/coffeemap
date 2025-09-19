@@ -93,8 +93,8 @@ function applyFilters(){
   let metroCoords=null;
 
   if(metroCircle){map.geoObjects.remove(metroCircle); metroCircle=null;}
-  if(metroVal){
-    metroCoords=metroVal.split(',').map(Number);
+ if(metroVal){
+  metroCoords = metroVal.split(',').map(coord => parseFloat(coord.trim()));
     metroCircle=new ymaps.Circle([metroCoords,radiusMeters],{}, {fillColor:'#DB709380',strokeColor:'#990066',strokeWidth:1});
     map.geoObjects.add(metroCircle);
   }
@@ -131,12 +131,12 @@ function addUserMarker(coords){
   map.geoObjects.add(userMarker); map.setCenter(coords,14,{duration:500});
 }
 
-// Открываем маршрут в Яндекс.Картах
 function openRoute(lat, lon){
   if(!userCoords){
     alert("Сначала определите ваше местоположение!");
     return;
   }
   const url = `https://yandex.ru/maps/?rtext=${userCoords[0]},${userCoords[1]}~${lat},${lon}&rtt=auto`;
-  window.open(url,'_blank');
+  window.open(url, '_blank');
 }
+
