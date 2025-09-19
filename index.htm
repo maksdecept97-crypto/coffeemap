@@ -1,50 +1,64 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="utf-8">
   <title>Где найти своё Тепло</title>
-  <link rel="stylesheet" href="style.css">
   <script src="https://api-maps.yandex.ru/2.1/?lang=ru_RU" type="text/javascript"></script>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
+  <!-- ========== Шапка ========== -->
   <div class="header">
     <h1 style="display:flex; align-items:center; gap:10px;">
-      <img src="https://github.com/maksdecept97-crypto/coffeemap/blob/main/logo.jpg?raw=true" 
+      <img src="https://github.com/maksdecept97-crypto/coffeemap/blob/main/logo1.png?raw=true" 
            alt="Логотип" 
-           style="height:40px; display:block;">
+           style="height:75px; width:auto; display:block;"
+           loading="lazy">
       Где найти своё Тепло
     </h1>
     <div class="search-container">
-      <!-- кнопка для списка -->
-      <button id="toggleList">☰ Список</button>
-      <!-- фильтры -->
-      <select id="metroFilter">
-        <option value="">Все станции</option>
-        <option value="Гостиный двор">Гостиный двор</option>
-        <option value="Невский проспект">Невский проспект</option>
-      </select>
-      <select id="radiusFilter">
-        <option value="0">Без радиуса</option>
-        <option value="500">500 м</option>
-        <option value="1000">1 км</option>
-      </select>
-      <input type="text" id="searchBox" placeholder="Поиск кофеен...">
+      <input type="text" class="search-box" placeholder="Поиск кофеен...">
     </div>
   </div>
 
-  <!-- выезжающий список -->
-  <div id="coffeeList" class="coffee-list">
-    <ul id="listContent"></ul>
+  <!-- ========== Фильтры ========== -->
+  <div class="filter-container">
+    <button class="show-sidebar-btn" title="Показать список кофеен"><i class="fas fa-list"></i> Список</button>
+    <button class="filter-btn active" data-filter="all">Все</button>
+    <button class="filter-btn" data-filter="center">В центре</button>
+    <button class="filter-btn" data-filter="with-food">С едой</button>
+    <select id="metro-filter">
+      <option value="">Метро (Все станции)</option>
+      <option value="59.935497,30.327139">Невский проспект</option>
+      <option value="59.927636,30.347917">Владимирская</option>
+      <option value="59.956157,30.318796">Горьковская</option>
+      <option value="59.944542,30.359965">Чернышевская</option>
+      <option value="59.916351,30.318347">Технологический институт</option>
+      <option value="59.907422,30.299664">Балтийская</option>
+      <option value="59.966444,30.311421">Петроградская</option>
+      <option value="59.931779,30.360737">Пл.Восстания</option>
+      <option value="59.942520,30.278278">Василеостровская</option>
+      <option value="59.926912,30.318882">Сенная/Садовая/Спасская</option>
+      <option value="59.935962,30.314754">Адмиралтейская</option>
+      <option value="59.931233,30.354801">Маяковская</option>
+    </select>
   </div>
 
-  <!-- контейнер карты -->
-  <div id="map"></div>
+  <!-- ========== Основной контент ========== -->
+  <div class="main-content">
+    <div class="sidebar"><ul class="coffee-list"></ul></div>
+    <div class="sidebar-overlay"></div>
+    <div id="map"></div>
+  </div>
 
-  <!-- наши скрипты -->
-  <script src="data.js"></script>
-  <script src="map.js"></script>
-  <script src="ui.js"></script>
-  <script src="app.js"></script>
+  <button class="user-location-btn" title="Мое местоположение"><i class="fas fa-location-arrow"></i></button>
+
+  <!-- Подключаем JavaScript файлы -->
+  <script src="data/coffee-data.js"></script>
+  <script src="js/map.js"></script>
+  <script src="js/ui.js"></script>
+  <script src="js/app.js"></script>
 </body>
 </html>
