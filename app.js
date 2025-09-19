@@ -1,8 +1,9 @@
 ymaps.ready(init);
 let map, coffeePlaces=[], userMarker=null, metroCircle=null, userCoords=null;
-
+										
 function init(){
   map = new ymaps.Map("map",{center:[59.93,30.34], zoom:12, controls:['zoomControl','geolocationControl']});
+
   addCoffeePlaces();
   renderCoffeeList();
   initEventHandlers();
@@ -10,11 +11,11 @@ function init(){
 
   // Закрытие балуна при клике на карту
   map.events.add('click', function(){
-    coffeePlaces.forEach(cp=>cp.placemark.balloon.close());
-    document.querySelector('.sidebar').classList.remove('show');
+     map.events.add('click', () => {
+    coffeePlaces.forEach(cp => cp.placemark.balloon.close());
   });
 }
-
+																   
 function addCoffeePlaces(){
   coffeeData.forEach(coffee => {
     const balloonContentBody = `
@@ -37,16 +38,20 @@ function addCoffeePlaces(){
       iconLayout:'default#image',
       iconImageHref:'https://github.com/maksdecept97-crypto/coffeemap/blob/main/point.png?raw=true',
       iconImageSize:[18,28],
-      iconImageOffset:[-20,-40],
-      balloonShadow:false
+     iconImageOffset:[-9,-28], // сдвиг для корректного отображения балуна
+      balloonMaxWidth:300 // ограничение ширины для мобильной версии
     });
 
     coffeePlaces.push({id: coffee.id, placemark, data: coffee});
     map.geoObjects.add(placemark);
-    placemark.events.add('click', () => { highlightCoffeeItem(coffee.id); });
+
+    placemark.events.add('click', () => { 
+      highlightCoffeeItem(coffee.id); 
+    });
   });
 }
 
+															  
 function renderCoffeeList(){
   const list=document.querySelector('.coffee-list');
   list.innerHTML='';
@@ -56,18 +61,26 @@ function renderCoffeeList(){
     li.innerHTML=`<div class="coffee-name">${coffee.name}</div><div class="coffee-address">${coffee.address}</div>`;
     li.addEventListener('click',()=>{
       const cp=coffeePlaces.find(c=>c.id===coffee.id);
-      if(cp){map.setCenter(cp.placemark.geometry.getCoordinates(),16); cp.placemark.balloon.open(); highlightCoffeeItem(coffee.id);}
+	if(cp){
+        map.setCenter(cp.placemark.geometry.getCoordinates(),16); 
+        cp.placemark.balloon.open(); 
+        highlightCoffeeItem(coffee.id);
+        // Закрываем sidebar после клика
+        hideSidebar();
+      }	
     });
     list.appendChild(li);
   });
 }
 
+													   
 function highlightCoffeeItem(id){
   document.querySelectorAll('.coffee-item').forEach(i=>i.classList.remove('active'));
   const selected=document.querySelector(`.coffee-item[data-id="${id}"]`);
   if(selected){selected.classList.add('active'); selected.scrollIntoView({behavior:'smooth',block:'nearest'});}
 }
 
+																	 
 function initEventHandlers(){
   document.querySelector('.search-box').addEventListener('input',applyFilters);
   document.querySelectorAll('.filter-btn').forEach(btn=>btn.addEventListener('click',function(){
@@ -78,11 +91,28 @@ function initEventHandlers(){
   document.querySelector('.user-location-btn').addEventListener('click',locateUser);
 
   // Кнопка показа/скрытия панели
+	const sidebar=document.querySelector('.sidebar');
+  const overlay=document.querySelector('.sidebar-overlay');
+											   
+														   
+
   document.querySelector('.show-sidebar-btn').addEventListener('click',()=>{
-    document.querySelector('.sidebar').classList.toggle('show');
+    sidebar.classList.toggle('show');
+    overlay.classList.toggle('show');
+									 
   });
+// Закрываем sidebar при клике на overlay
+  overlay.addEventListener('click',hideSidebar);
+															  
+												
+}
+// Функция скрытия sidebar
+function hideSidebar(){
+  document.querySelector('.sidebar').classList.remove('show');
+  document.querySelector('.sidebar-overlay').classList.remove('show');
 }
 
+// Применение фильтров к кофейням																
 function applyFilters(){
   const searchText=document.querySelector('.search-box').value.toLowerCase();
   const activeFilter=document.querySelector('.filter-btn.active').dataset.filter;
@@ -113,6 +143,7 @@ function applyFilters(){
   });
 }
 
+																	   
 function locateUser(){
   if(!navigator.geolocation){alert("Геолокация не поддерживается вашим браузером."); return;}
   navigator.geolocation.getCurrentPosition(pos=>{
@@ -121,14 +152,23 @@ function locateUser(){
   },err=>{console.error("Ошибка геолокации:",err); alert("Не удалось определить местоположение.");},{enableHighAccuracy:true,timeout:5000});
 }
 
+															   
 function addUserMarker(coords){
   if(userMarker){map.geoObjects.remove(userMarker);}
   userMarker=new ymaps.Placemark(coords,{balloonContent:'Вы здесь'},{preset:'islands#circleIcon',iconColor:'#3399ff'});
-  map.geoObjects.add(userMarker); map.setCenter(coords,14,{duration:500});
+  map.geoObjects.add(userMarker); 
+  map.setCenter(coords,14,{duration:500});
 }
 
+	// Открываем маршрут через Яндекс.Карты																   
 function openRoute(lat, lon){
-  if(!userCoords){alert("Сначала определите ваше местоположение!"); return;}
+				  
+  if(!userCoords){
+    alert("Сначала определите ваше местоположение!");
+	return;
+  }
+		   
+   
   const url = `https://yandex.ru/maps/?rtext=${userCoords[0]},${userCoords[1]}~${lat},${lon}&rtt=auto`;
   window.open(url,'_blank');
 }
