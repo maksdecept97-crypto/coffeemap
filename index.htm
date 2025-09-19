@@ -111,7 +111,7 @@ body{font-family:'Times New Roman', Courier, Verdana,sans-serif;height:100vh;dis
   <button class="filter-btn" data-filter="center">В центре</button>
   <button class="filter-btn" data-filter="with-food">С едой</button>
   <select id="metro-filter">
-    <option value="">Метро (выберите)</option>
+    <option value="">Метро (Все станции)</option>
     <option value="59.935497, 30.327139">Невский проспект</option>
     <option value="59.927636, 30.347917">Владимирская</option>
     <option value="59.956157, 30.318796">Горьковская</option>
@@ -194,10 +194,10 @@ function addCoffeePlaces(){
     }, {
       iconLayout:'default#image',
       iconImageHref:'https://github.com/maksdecept97-crypto/coffeemap/blob/main/point.png?raw=true',
-      iconImageSize:[18,28],
+      iconImageSize:[18,25],
       iconImageOffset:[-9,-28],
       // важные параметры для корректного отображения балуна на мобильных
-      balloonMaxWidth: 340,
+      balloonMaxWidth: 350,
       balloonOffset: [0, -32],
       balloonPanelMaxMapArea: 0
     });
@@ -368,3 +368,4 @@ window.addEventListener('orientationchange', ()=>{ setTimeout(adjustSidebarPosit
 </script>
 </body>
 </html>
+
