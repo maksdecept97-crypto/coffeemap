@@ -1,21 +1,26 @@
 ymaps.ready(init);
 let map, coffeePlaces=[], userMarker=null, metroCircle=null, userCoords=null;
-										
+
+// Данные кофеен
+const coffeeData = [
+  {id:1,name:"Tour Coffee",coordinates:[59.911946,30.316499],address:"7-я Красноармейская ул., 5Д",description:"Tour coffee — это предвкушение каждый раз чего-то нового: разные сорта, разные обжарщики. Здесь подают гриль-чизы и свежие десерты. И конечно кофе.",telegramEmbed:"https://t.me/teplo_coffeeroutes/4?embed=1",tags:["center","with-food"]},
+  {id:2,name:"UNIC",coordinates:[59.960012,30.311556],address:"ул. Кронверская, 12",description:"UNIC — место, куда хочется приходить за едой и кофе.",telegramEmbed:"https://t.me/teplo_coffeeroutes/8?embed=1",tags:["center","with-food"]},
+  {id:3,name:"Verlé",coordinates:[59.963493, 30.314817],address:"Каменноостровский пр-т, 25/2",description:"Уютное место с отличным кофе и атмосферой.",telegramEmbed:"https://t.me/teplo_coffeeroutes/15?embed=1",tags:["center"]},
+  {id:4,name:"Щегол",coordinates:[59.941899, 30.363427],address:"ул. Радищева, 38/20",description:"Уютная кофейня с тёплым, домашним дизайном, куда хочется заходить в любое время года.",telegramEmbed:"https://t.me/teplo_coffeeroutes/22?embed=1",tags:["center","with-food"]},
+  {id:5,name:"Bolshecoffee roasters",coordinates:[59.927991, 30.353581],address:"ул. Марата, 22-2",description:"Bolshecoffee Roasters — это место, где вы можете насладиться ароматным кофе и вкусными десертами. Здесь вы найдете широкий выбор кофейных зерен.",telegramEmbed:"",tags:["center","with-food"]},
+  {id:6,name:"Сибаристика",coordinates:[59.910412, 30.284159],address:"наб. Обводного канала, 199-201К",description:"Sibaristica — это часть большого пространства, в которое входят коворкинг и школа бариста. В меню вошли почти два десятка видов кофе от классических черных до авторских — латте ройбуш, раф соленый арахис, флэт уайт, бариста-сет из трех напитков.",telegramEmbed:"https://t.me/teplo_coffeeroutes/35",tags:["with-food"]},
+  {id:7,name:"Щегол",coordinates:[59.912521, 30.317260],address:"6-я Красноармейская ул., 1",description:"Приятная кофейня с вкусным меню и прекрасным кофе.Просторные стеклянные двери, которые распахиваются в хорошую погоду, полка во всю стену с модными журналами, аккуратные столики и стильные лампы, гармонично вписывающиеся в интерьер.",telegramEmbed:"https://t.me/teplo_coffeeroutes/22?embed=1",tags:["with-food"]}
+];
+
 function init(){
   map = new ymaps.Map("map",{center:[59.93,30.34], zoom:12, controls:['zoomControl','geolocationControl']});
-
   addCoffeePlaces();
   renderCoffeeList();
   initEventHandlers();
   locateUser();
-
-  // Закрытие балуна при клике на карту
-  map.events.add('click', function(){
-     map.events.add('click', () => {
-    coffeePlaces.forEach(cp => cp.placemark.balloon.close());
-  });
 }
-																   
+
+// Добавление меток на карту
 function addCoffeePlaces(){
   coffeeData.forEach(coffee => {
     const balloonContentBody = `
@@ -33,142 +38,3 @@ function addCoffeePlaces(){
 
     const placemark = new ymaps.Placemark(coffee.coordinates, {
       balloonContentHeader: coffee.name,
-      balloonContentBody: balloonContentBody
-    }, {
-      iconLayout:'default#image',
-      iconImageHref:'https://github.com/maksdecept97-crypto/coffeemap/blob/main/point.png?raw=true',
-      iconImageSize:[18,28],
-     iconImageOffset:[-9,-28], // сдвиг для корректного отображения балуна
-      balloonMaxWidth:300 // ограничение ширины для мобильной версии
-    });
-
-    coffeePlaces.push({id: coffee.id, placemark, data: coffee});
-    map.geoObjects.add(placemark);
-
-    placemark.events.add('click', () => { 
-      highlightCoffeeItem(coffee.id); 
-    });
-  });
-}
-
-															  
-function renderCoffeeList(){
-  const list=document.querySelector('.coffee-list');
-  list.innerHTML='';
-  coffeeData.forEach(coffee=>{
-    const li=document.createElement('li');
-    li.className='coffee-item'; li.dataset.id=coffee.id;
-    li.innerHTML=`<div class="coffee-name">${coffee.name}</div><div class="coffee-address">${coffee.address}</div>`;
-    li.addEventListener('click',()=>{
-      const cp=coffeePlaces.find(c=>c.id===coffee.id);
-	if(cp){
-        map.setCenter(cp.placemark.geometry.getCoordinates(),16); 
-        cp.placemark.balloon.open(); 
-        highlightCoffeeItem(coffee.id);
-        // Закрываем sidebar после клика
-        hideSidebar();
-      }	
-    });
-    list.appendChild(li);
-  });
-}
-
-													   
-function highlightCoffeeItem(id){
-  document.querySelectorAll('.coffee-item').forEach(i=>i.classList.remove('active'));
-  const selected=document.querySelector(`.coffee-item[data-id="${id}"]`);
-  if(selected){selected.classList.add('active'); selected.scrollIntoView({behavior:'smooth',block:'nearest'});}
-}
-
-																	 
-function initEventHandlers(){
-  document.querySelector('.search-box').addEventListener('input',applyFilters);
-  document.querySelectorAll('.filter-btn').forEach(btn=>btn.addEventListener('click',function(){
-    document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active')); this.classList.add('active');
-    applyFilters();
-  }));
-  document.getElementById('metro-filter').addEventListener('change',applyFilters);
-  document.querySelector('.user-location-btn').addEventListener('click',locateUser);
-
-  // Кнопка показа/скрытия панели
-	const sidebar=document.querySelector('.sidebar');
-  const overlay=document.querySelector('.sidebar-overlay');
-											   
-														   
-
-  document.querySelector('.show-sidebar-btn').addEventListener('click',()=>{
-    sidebar.classList.toggle('show');
-    overlay.classList.toggle('show');
-									 
-  });
-// Закрываем sidebar при клике на overlay
-  overlay.addEventListener('click',hideSidebar);
-															  
-												
-}
-// Функция скрытия sidebar
-function hideSidebar(){
-  document.querySelector('.sidebar').classList.remove('show');
-  document.querySelector('.sidebar-overlay').classList.remove('show');
-}
-
-// Применение фильтров к кофейням																
-function applyFilters(){
-  const searchText=document.querySelector('.search-box').value.toLowerCase();
-  const activeFilter=document.querySelector('.filter-btn.active').dataset.filter;
-  const metroVal=document.getElementById('metro-filter').value;
-  const radiusMeters=800;
-  let metroCoords=null;
-
-  if(metroCircle){map.geoObjects.remove(metroCircle); metroCircle=null;}
-  if(metroVal){
-    metroCoords=metroVal.split(',').map(Number);
-    metroCircle=new ymaps.Circle([metroCoords,radiusMeters],{}, {fillColor:'#DB709380',strokeColor:'#990066',strokeWidth:1});
-    map.geoObjects.add(metroCircle);
-  }
-
-  coffeePlaces.forEach(cp=>{
-    const name=cp.data.name.toLowerCase(), addr=cp.data.address.toLowerCase();
-    let visible=true;
-    if(searchText && !name.includes(searchText) && !addr.includes(searchText)) visible=false;
-    if(activeFilter!=='all' && !cp.data.tags.includes(activeFilter)) visible=false;
-    if(metroCoords){
-      const dist=ymaps.coordSystem.geo.getDistance(cp.data.coordinates,metroCoords);
-      if(dist>radiusMeters) visible=false;
-    }
-
-    cp.placemark.options.set('visible',visible);
-    const li=document.querySelector(`.coffee-item[data-id="${cp.id}"]`);
-    if(li) li.style.display=visible?'block':'none';
-  });
-}
-
-																	   
-function locateUser(){
-  if(!navigator.geolocation){alert("Геолокация не поддерживается вашим браузером."); return;}
-  navigator.geolocation.getCurrentPosition(pos=>{
-    userCoords=[pos.coords.latitude,pos.coords.longitude];
-    addUserMarker(userCoords);
-  },err=>{console.error("Ошибка геолокации:",err); alert("Не удалось определить местоположение.");},{enableHighAccuracy:true,timeout:5000});
-}
-
-															   
-function addUserMarker(coords){
-  if(userMarker){map.geoObjects.remove(userMarker);}
-  userMarker=new ymaps.Placemark(coords,{balloonContent:'Вы здесь'},{preset:'islands#circleIcon',iconColor:'#3399ff'});
-  map.geoObjects.add(userMarker); 
-  map.setCenter(coords,14,{duration:500});
-}
-
-	// Открываем маршрут через Яндекс.Карты																   
-function openRoute(lat, lon){
-				  
-  if(!userCoords){
-    alert("Сначала определите ваше местоположение!");
-	return;
-  }
-		   
-   
-  const url = `https://yandex.ru/maps/?rtext=${userCoords[0]},${userCoords[1]}~${lat},${lon}&rtt=auto`;
-  window.open(url,'_blank');
-}
