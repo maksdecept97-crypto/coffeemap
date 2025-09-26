@@ -166,7 +166,7 @@ window.openRoute = function(lat, lon){
 ymaps.ready(function () {
   // Добавляем собственный слой
   const myTheme = function () {
-    const layer = new ymaps.Layer('https://core-renderer-tiles.maps.yandex.net/tiles?l=map&%c&theme=dark');
+    const layer = new ymaps.Layer('https://core-renderer-tiles.maps.yandex.net/tiles?l=map&%c&theme=light');
     return layer;
   };
 
@@ -181,13 +181,8 @@ ymaps.ready(function () {
     controls: ['zoomControl', 'geolocationControl'],
     type: 'my#lightgray' // <-- применяем свой стиль
   });
-
-  // Загружаем кофейни
-  addCoffeePlaces();
-
-  // Определяем местоположение пользователя
-  locateUser();
 });
+
 
 
 
