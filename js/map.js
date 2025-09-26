@@ -166,13 +166,13 @@ window.openRoute = function(lat, lon){
 ymaps.ready(function () {
   // Добавляем собственный слой
   const myTheme = function () {
-    const layer = new ymaps.Layer('https://core-renderer-tiles.maps.yandex.net/tiles?l=map&%c&theme=light');
+    const layer = new ymaps.Layer('https://core-renderer-tiles.maps.yandex.net/tiles?l=map&%c&theme=dark');
     return layer;
   };
 
   // Регистрируем слой и тип карты
   ymaps.layer.storage.add('my#lightgray', myTheme);
-  ymaps.mapType.storage.add('my#lightgray', new ymaps.MapType('Светлая карта', ['my#lightgray']));
+  ymaps.mapType.storage.add('my#lightgray', new ymaps.MapType('Тёмная карта', ['my#lightgray']));
 
   // Создаём карту
   map = new ymaps.Map("map", {
@@ -188,6 +188,7 @@ ymaps.ready(function () {
   // Определяем местоположение пользователя
   locateUser();
 });
+
 
 
 
