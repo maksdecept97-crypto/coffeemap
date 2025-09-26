@@ -258,10 +258,8 @@ body {
     .balloon-scroll {
         max-height: 72vh;
     }
-    {
-  filter: grayscale(80%) brightness(0.4) sepia(60%) hue-rotate(180deg) saturate(200%);
 }
-}
+
 
 
 
