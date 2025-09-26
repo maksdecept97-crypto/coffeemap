@@ -258,7 +258,11 @@ body {
     .balloon-scroll {
         max-height: 72vh;
     }
+    {
+  filter: hue-rotate(200deg) brightness(0.5) contrast(1.1);
 }
+}
+
 
 
 
