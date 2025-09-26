@@ -259,9 +259,10 @@ body {
         max-height: 72vh;
     }
     {
-  filter: hue-rotate(200deg) brightness(0.5) contrast(1.1);
+  filter: grayscale(80%) brightness(0.4) sepia(60%) hue-rotate(180deg) saturate(200%);
 }
 }
+
 
 
 
