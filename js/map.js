@@ -162,26 +162,9 @@ window.openRoute = function(lat, lon){
   window.open(url, '_blank');
 };
 
-/* ========== Инициализация карты с кастомным стилем ========== */
-ymaps.ready(function () {
-  // Добавляем собственный слой
-  const myTheme = function () {
-    const layer = new ymaps.Layer('https://core-renderer-tiles.maps.yandex.net/tiles?l=map&%c&theme=light');
-    return layer;
-  };
 
-  // Регистрируем слой и тип карты
-  ymaps.layer.storage.add('my#lightgray', myTheme);
-  ymaps.mapType.storage.add('my#lightgray', new ymaps.MapType('Тёмная карта', ['my#lightgray']));
-
-  // Создаём карту
-  map = new ymaps.Map("map", {
-    center: [59.9343, 30.3351], // центр СПб
-    zoom: 12,
-    controls: ['zoomControl', 'geolocationControl'],
-    type: 'my#lightgray' // <-- применяем свой стиль
-  });
 });
+
 
 
 
